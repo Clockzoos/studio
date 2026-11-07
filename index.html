@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,22 +13,36 @@
         <p>Free Roblox scripts, updated regularly. Find one, hit Get Script, and you're set.</p>
     </header>
 
-    <!-- Tombol menuju Panel Upload / Admin -->
+    <!-- Upload Panel Link -->
     <div class="admin-link">
         <a href="admin.html">+ Upload Script (Admin UI)</a>
     </div>
 
-    <!-- Kolom Search -->
+    <!-- Search Bar -->
     <div class="search-container">
         <input type="text" id="searchInput" placeholder="Search scripts..." onkeyup="searchScript()">
     </div>
 
-    <!-- Daftar Skrip Dinamis -->
+    <!-- Dynamic Script Grid -->
     <div class="script-grid" id="scriptList">
-        <!-- Data akan dimuat otomatis lewat JavaScript -->
+        <!-- Data loaded via JavaScript -->
+    </div>
+
+    <!-- CUSTOM DELETE MODAL -->
+    <div id="deleteModal" class="modal-overlay">
+        <div class="modal-box">
+            <h3>Delete Script?</h3>
+            <p>This action cannot be undone. The script will be permanently removed.</p>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+                <button class="btn-confirm-delete" onclick="executeDelete()">Yes, Delete</button>
+            </div>
+        </div>
     </div>
 
     <script>
+        let scriptToDeleteIndex = null;
+
         function loadScripts() {
             let scripts = JSON.parse(localStorage.getItem('entropy_scripts')) || [
                 {
@@ -44,8 +58,10 @@
             scripts.forEach((item, index) => {
                 container.innerHTML += `
                     <div class="script-card" data-title="${item.title.toLowerCase()}">
-                        <!-- Tombol Delete di Kanan Atas Kartu -->
-                        <button class="btn-delete" onclick="deleteScript(${index})" title="Hapus Skrip">×</button>
+                        <!-- Delete Button -->
+                        <button class="btn-delete" onclick="openDeleteModal(${index})" title="Delete Script">
+                            🗑️
+                        </button>
                         
                         <img src="${item.image}" alt="Thumbnail">
                         <div class="card-content">
@@ -60,23 +76,30 @@
             });
         }
 
-        // Fungsi untuk Menghapus Skrip
-        function deleteScript(index) {
-            let confirmDelete = confirm("Yakin ingin menghapus skrip ini?");
-            if (confirmDelete) {
+        // Open Custom Modal
+        function openDeleteModal(index) {
+            scriptToDeleteIndex = index;
+            document.getElementById('deleteModal').style.display = 'flex';
+        }
+
+        // Close Custom Modal
+        function closeDeleteModal() {
+            scriptToDeleteIndex = null;
+            document.getElementById('deleteModal').style.display = 'none';
+        }
+
+        // Execute Delete
+        function executeDelete() {
+            if (scriptToDeleteIndex !== null) {
                 let scripts = JSON.parse(localStorage.getItem('entropy_scripts')) || [];
-                
-                // Hapus data berdasarkan urutan index-nya
-                scripts.splice(index, 1);
-                
-                // Simpan ulang ke LocalStorage
+                scripts.splice(scriptToDeleteIndex, 1);
                 localStorage.setItem('entropy_scripts', JSON.stringify(scripts));
-                
-                // Refresh tampilan kartu
+                closeDeleteModal();
                 loadScripts();
             }
         }
 
+        // Search Function
         function searchScript() {
             let input = document.getElementById('searchInput').value.toLowerCase();
             let cards = document.getElementsByClassName('script-card');
