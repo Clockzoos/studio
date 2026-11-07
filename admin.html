@@ -1,39 +1,39 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Entropy-Script</title>
+    <title>Admin Upload - Entropy-Script</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css"/>
     <style>
         .img-container { max-width: 100%; max-height: 300px; margin-bottom: 15px; display: none; }
         .img-container img { max-width: 100%; display: block; }
-        .btn-crop { background-color: #333; color: #ffbb00; border: 1px solid #ffbb00; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-bottom: 15px; display: none; width: 100%; }
-        #croppedPreview { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 15px; display: none; border: 1px dashed #ffbb00; }
+        .btn-crop { background-color: #222; color: #38bdf8; border: 1px solid #38bdf8; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-bottom: 15px; display: none; width: 100%; }
+        #croppedPreview { width: 100%; height: 140px; object-fit: cover; border-radius: 8px; margin-bottom: 15px; display: none; border: 1px dashed #38bdf8; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>ADMIN UPLOAD PANEL</h1>
-        <p>Upload thumbnail, crop it, and publish instantly!</p>
+        <h1>UPLOAD SCRIPT</h1>
+        <p>Upload your script and thumbnail to the review queue.</p>
     </header>
 
     <div class="admin-link">
-        <a href="index.html">← Back to Home</a>
+        <a href="index.html">← Back to Homepage</a>
     </div>
 
-    <div class="admin-form-container">
-        <form id="uploadForm" onsubmit="publishScript(event)">
-            <div class="form-group">
-                <label>Script Title:</label>
-                <input type="text" id="scriptTitle" placeholder="Example: Blox Fruits Auto Farm..." required>
+    <div class="admin-form-container" style="max-width: 600px; margin: 20px auto; background: #1e293b; padding: 20px; border-radius: 10px; border: 1px solid #334155;">
+        <form id="uploadForm" onsubmit="submitToQueue(event)">
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="display:block; margin-bottom: 5px;">Script Title:</label>
+                <input type="text" id="scriptTitle" placeholder="e.g. Blox Fruits Auto Farm" style="width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 6px;" required>
             </div>
             
-            <div class="form-group">
-                <label>Select Image from Gallery:</label>
-                <input type="file" id="imageInput" accept="image/*" style="padding: 8px; background: #0f0f0f; color: #fff; border: 1px solid #333; border-radius: 8px; width: 100%;">
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="display:block; margin-bottom: 5px;">Thumbnail Image:</label>
+                <input type="file" id="imageInput" accept="image/*" style="padding: 8px; background: #0f172a; color: #fff; border: 1px solid #334155; border-radius: 6px; width: 100%;">
             </div>
 
             <div class="img-container" id="cropperArea">
@@ -43,19 +43,19 @@
 
             <img id="croppedPreview" alt="Cropped Preview">
 
-            <div class="form-group">
-                <label>Script Link (Pastebin / Luarmor):</label>
-                <input type="text" id="scriptLink" placeholder="https://pastebin.com/..." required>
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label style="display:block; margin-bottom: 5px;">Script Link (Pastebin / Luarmor):</label>
+                <input type="text" id="scriptLink" placeholder="https://pastebin.com/..." style="width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 6px;" required>
             </div>
 
-            <button type="submit" class="btn-submit" id="submitBtn">Publish Script Now 🚀</button>
+            <button type="submit" class="btn-submit" id="submitBtn" style="width: 100%; padding: 12px; background: #10b981; color: white; border: none; font-weight: bold; border-radius: 6px; cursor: pointer;">Submit to Review Queue 📥</button>
         </form>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script>
-        // KREDENSIAL JSONBIN BARU KAMU
-        const BIN_ID = "6aef05abac6210605a74f72a";
+        // DIARAHKAN KE QUEUE BIN (AGAR MASUK PRIVAT DULU)
+        const QUEUE_BIN_ID = "6aef24a9ac6210605a7541d0"; 
         const MASTER_KEY = "$2a$10$7kUozSyzkNytbUxnN7/kv.xInV14ItUgvNAWdjKEswZ0M.DDWgL/e";
 
         let cropper;
@@ -94,11 +94,11 @@
                 cropperArea.style.display = 'none';
                 cropBtn.style.display = 'none';
                 cropper.destroy();
-                alert('Image cropped successfully!');
+                alert('Image successfully cropped!');
             }
         }
 
-        async function publishScript(event) {
+        async function submitToQueue(event) {
             event.preventDefault();
             let title = document.getElementById('scriptTitle').value;
             let link = document.getElementById('scriptLink').value;
@@ -109,50 +109,52 @@
                 return;
             }
 
-            submitBtn.innerText = "Publishing to Website...";
+            if (!confirm(`Are you sure you want to submit "${title}" to the review queue?`)) return;
+
+            submitBtn.innerText = "Sending to Queue...";
             submitBtn.disabled = true;
 
             try {
-                // 1. Ambil data lama dari JSONBin
-                let getRes = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                // 1. Ambil data antrean privat yang ada di Queue Bin
+                let getRes = await fetch(`https://api.jsonbin.io/v3/b/${QUEUE_BIN_ID}/latest`, {
                     headers: { 'X-Master-Key': MASTER_KEY }
                 });
                 let getData = await getRes.json();
-                let currentScripts = getData.record || [];
+                let queue = getData.record || [];
 
-                if (!Array.isArray(currentScripts)) {
-                    currentScripts = [];
+                if (!Array.isArray(queue)) {
+                    queue = [];
                 }
 
-                // 2. Tambah skrip baru ke urutan paling atas
-                currentScripts.unshift({
+                // 2. Masukkan script baru ke urutan paling atas antrean
+                queue.unshift({
                     title: title,
                     image: finalImageUrl,
                     link: link
                 });
 
-                // 3. Simpan kembali data terbaru ke JSONBin
-                let putRes = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                // 3. Simpan kembali ke Queue Bin
+                let putRes = await fetch(`https://api.jsonbin.io/v3/b/${QUEUE_BIN_ID}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-Master-Key': MASTER_KEY
                     },
-                    body: JSON.stringify(currentScripts)
+                    body: JSON.stringify(queue)
                 });
 
                 if (putRes.ok) {
-                    alert('Script successfully published online for everyone!');
+                    alert('Success! Script has been sent to the review queue. Waiting for your approval in the Review panel.');
                     window.location.href = 'index.html';
                 } else {
-                    alert('Failed to publish. Check your settings.');
-                    submitBtn.innerText = "Publish Script Now 🚀";
+                    alert('Failed to submit script.');
+                    submitBtn.innerText = "Submit to Review Queue 📥";
                     submitBtn.disabled = false;
                 }
             } catch (error) {
                 console.error(error);
-                alert('An error occurred.');
-                submitBtn.innerText = "Publish Script Now 🚀";
+                alert('An error occurred while connecting to the server.');
+                submitBtn.innerText = "Submit to Review Queue 📥";
                 submitBtn.disabled = false;
             }
         }
