@@ -22,6 +22,11 @@ header h1 {
     margin-bottom: 10px;
 }
 
+header p {
+    color: #b0b0b0;
+    font-size: 0.95rem;
+}
+
 .admin-link {
     display: block;
     text-align: right;
@@ -72,10 +77,37 @@ header h1 {
 }
 
 .script-card {
+    position: relative;
     background-color: #161616;
     border: 1px solid #222;
     border-radius: 12px;
     overflow: hidden;
+}
+
+/* Styling Tombol Delete di Kanan Atas Kartu */
+.btn-delete {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(255, 0, 0, 0.8);
+    color: #fff;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+    z-index: 10;
+}
+
+.btn-delete:hover {
+    background-color: rgb(255, 0, 0);
+    transform: scale(1.1);
 }
 
 .script-card img {
