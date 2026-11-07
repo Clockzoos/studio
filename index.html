@@ -13,41 +13,51 @@
         <p>Free Roblox scripts, updated regularly. Find one, hit Get Script, and you're set.</p>
     </header>
 
+    <!-- Tombol menuju Panel Upload / Admin -->
+    <div class="admin-link">
+        <a href="admin.html">+ Upload Script (Admin UI)</a>
+    </div>
+
     <!-- Kolom Search -->
     <div class="search-container">
         <input type="text" id="searchInput" placeholder="Search scripts..." onkeyup="searchScript()">
-        <button>Search</button>
     </div>
 
-    <!-- Daftar Skrip (Cards) -->
+    <!-- Daftar Skrip Dinamis -->
     <div class="script-grid" id="scriptList">
-        <!-- Kartu 1 -->
-        <div class="script-card" data-title="milkxp op script free ugc">
-            <img src="https://via.placeholder.com/300x150/222/ffbb00?text=Entropy-Script" alt="Thumbnail">
-            <div class="card-content">
-                <h3>[FREE UGC] milkXP! OP SCRIPT (SUPER EASY UGC) | *PASTEBIN*</h3>
-                <div class="card-footer">
-                    <span>45 views</span>
-                    <a href="detail.html">View script →</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Kartu 2 (Contoh Tambahan) -->
-        <div class="script-card" data-title="blitz hub blox fruits">
-            <img src="https://via.placeholder.com/300x150/222/ffbb00?text=Entropy-Script" alt="Thumbnail">
-            <div class="card-content">
-                <h3>Blox Fruits Auto Farm - Entropy-Script Hub</h3>
-                <div class="card-footer">
-                    <span>120 views</span>
-                    <a href="detail.html">View script →</a>
-                </div>
-            </div>
-        </div>
+        <!-- Data akan dimuat otomatis lewat JavaScript -->
     </div>
 
-    <!-- Script JavaScript untuk Fitur Search sederhana -->
     <script>
+        function loadScripts() {
+            let scripts = JSON.parse(localStorage.getItem('entropy_scripts')) || [
+                {
+                    title: "[FREE UGC] milkXP! OP SCRIPT (SUPER EASY UGC)",
+                    image: "https://via.placeholder.com/300x150/222/ffbb00?text=MilkXP",
+                    link: "https://pastebin.com"
+                }
+            ];
+
+            let container = document.getElementById('scriptList');
+            container.innerHTML = "";
+
+            scripts.forEach((item) => {
+                container.innerHTML += `
+                    <div class="script-card" data-title="${item.title.toLowerCase()}">
+                        <img src="${item.image}" alt="Thumbnail">
+                        <div class="card-content">
+                            <h3>${item.title}</h3>
+                            <div class="card-footer">
+                                <span>Entropy-Script</span>
+                                <!-- Langsung buka link tujuan tanpa detail.html -->
+                                <a href="${item.link}" target="_blank">Get Script →</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
         function searchScript() {
             let input = document.getElementById('searchInput').value.toLowerCase();
             let cards = document.getElementsByClassName('script-card');
@@ -61,6 +71,8 @@
                 }
             }
         }
+
+        window.onload = loadScripts;
     </script>
 
 </body>
