@@ -9,8 +9,14 @@
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f0f0f; color: #fff; margin: 0; padding: 20px; }
         header { text-align: center; margin-bottom: 30px; }
-        .btn-upload-trigger { background: #ffbb00; color: #000; padding: 10px 20px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; display: inline-block; margin-top: 15px; }
+        
+        /* TOMBOL HEADER BERPASANGAN */
+        .header-btns { display: flex; justify-content: center; gap: 12px; margin-top: 15px; flex-wrap: wrap; }
+        .btn-upload-trigger { background: #ffbb00; color: #000; padding: 10px 20px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; display: inline-block; text-decoration: none; }
         .btn-upload-trigger:hover { background: #e0a800; }
+        .btn-pastebin-trigger { background: transparent; color: #ffbb00; border: 2px solid #ffbb00; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; display: inline-block; text-decoration: none; transition: 0.2s; }
+        .btn-pastebin-trigger:hover { background: rgba(255, 187, 0, 0.1); }
+
         .container { max-width: 900px; margin: 0 auto; min-height: 60vh; padding-bottom: 50px; }
         .script-card { background: #161616; border: 1px solid #333; border-radius: 10px; padding: 15px; margin-bottom: 15px; display: flex; gap: 15px; align-items: center; }
         .script-card img { width: 120px; height: 68px; object-fit: cover; border-radius: 6px; }
@@ -63,7 +69,12 @@
     <header>
         <h1>ENTROPY SCRIPT HUB</h1>
         <p>Explore verified scripts or upload your own community creations.</p>
-        <button class="btn-upload-trigger" onclick="openUploadModal()">+ Upload Script</button>
+        
+        <!-- TOMBOL BERPASANGAN DI HEADER -->
+        <div class="header-btns">
+            <button class="btn-upload-trigger" onclick="openUploadModal()">+ Upload Script</button>
+            <a href="https://entropy-page.github.io/Pastebin/create.html" target="_blank" class="btn-pastebin-trigger">+ Create Pastebin</a>
+        </div>
     </header>
 
     <div class="container">
@@ -172,7 +183,6 @@
             }
         }
 
-        // SISTEM PENCATAT VIEWS KE VISITOR BIN
         async function trackAndLoadVisitorCount() {
             try {
                 let hasCounted = sessionStorage.getItem('entropy_visit_recorded');
