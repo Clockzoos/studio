@@ -3,251 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Hub Links</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-
-        body {
-            background: #0d0f12;
-            color: #f1f5f9;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 24px;
-        }
-
-        .wrapper {
-            width: 100%;
-            max-width: 440px;
-        }
-
-        /* Profil Header */
-        .profile-header {
-            text-align: center;
-            margin-bottom: 28px;
-        }
-
-        .avatar-wrap {
-            position: relative;
-            width: 90px;
-            height: 90px;
-            margin: 0 auto 14px;
-        }
-
-        .avatar-wrap img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #3b82f6;
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-        }
-
-        .profile-header h1 {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .profile-header p {
-            font-size: 0.85rem;
-            color: #94a3b8;
-        }
-
-        /* List Saluran/Link Khusus */
-        .channels-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .channel-card {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: #161922;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            padding: 14px 18px;
-            border-radius: 16px;
-            text-decoration: none;
-            color: inherit;
-            transition: all 0.25s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .channel-card:hover {
-            background: #1e2330;
-            border-color: rgba(255, 255, 255, 0.15);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-        }
-
-        .channel-info {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .channel-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            flex-shrink: 0;
-        }
-
-        /* Warna khas ikon per platform */
-        .wa-bg { background: rgba(37, 211, 102, 0.15); color: #25d366; }
-        .tt-bg { background: rgba(255, 255, 255, 0.08); color: #fff; }
-        .rbx-bg { background: rgba(220, 38, 38, 0.15); color: #ef4444; }
-
-        .channel-text h3 {
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin-bottom: 2px;
-        }
-
-        .channel-text span {
-            font-size: 0.75rem;
-            color: #94a3b8;
-        }
-
-        .channel-action {
-            color: #64748b;
-            font-size: 0.85rem;
-            transition: color 0.2s;
-        }
-
-        .channel-card:hover .channel-action {
-            color: #f1f5f9;
-        }
-
-        /* Footer & View Counter */
-        .footer-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #12151c;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            padding: 12px 18px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            color: #64748b;
-        }
-
-        .view-counter {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            color: #94a3b8;
-            font-family: monospace;
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
-
-        .view-counter i {
-            color: #3b82f6;
-        }
-    </style>
+    <title>Entropy-Script | Free Roblox Scripts</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="wrapper">
-        <!-- Profil Header -->
-        <div class="profile-header">
-            <div class="avatar-wrap">
-                <img src="https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=300&auto=format&fit=crop&q=80" alt="Avatar">
+    <header>
+        <h1>ENTROPY-SCRIPT</h1>
+        <p>Free Roblox scripts, updated regularly. Find one, hit Get Script, and you're set.</p>
+    </header>
+
+    <!-- Kolom Search -->
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Search scripts..." onkeyup="searchScript()">
+        <button>Search</button>
+    </div>
+
+    <!-- Daftar Skrip (Cards) -->
+    <div class="script-grid" id="scriptList">
+        <!-- Kartu 1 -->
+        <div class="script-card" data-title="milkxp op script free ugc">
+            <img src="https://via.placeholder.com/300x150/222/ffbb00?text=Entropy-Script" alt="Thumbnail">
+            <div class="card-content">
+                <h3>[FREE UGC] milkXP! OP SCRIPT (SUPER EASY UGC) | *PASTEBIN*</h3>
+                <div class="card-footer">
+                    <span>45 views</span>
+                    <a href="detail.html">View script →</a>
+                </div>
             </div>
-            <h1>Rian ID</h1>
-            <p>Welcome to my official channels & links hub</p>
         </div>
 
-        <!-- Daftar Saluran & Link Khusus -->
-        <div class="channels-list">
-            
-            <!-- Link Saluran WhatsApp -->
-            <a href="https://whatsapp.com/channel/CONTOH_LINK_KAMU" target="_blank" class="channel-card">
-                <div class="channel-info">
-                    <div class="channel-icon wa-bg">
-                        <i class="fa-brands fa-whatsapp"></i>
-                    </div>
-                    <div class="channel-text">
-                        <h3>Saluran WhatsApp</h3>
-                        <span>Gabung info & update terbaru</span>
-                    </div>
+        <!-- Kartu 2 (Contoh Tambahan) -->
+        <div class="script-card" data-title="blitz hub blox fruits">
+            <img src="https://via.placeholder.com/300x150/222/ffbb00?text=Entropy-Script" alt="Thumbnail">
+            <div class="card-content">
+                <h3>Blox Fruits Auto Farm - Entropy-Script Hub</h3>
+                <div class="card-footer">
+                    <span>120 views</span>
+                    <a href="detail.html">View script →</a>
                 </div>
-                <div class="channel-action"><i class="fa-solid fa-chevron-right"></i></div>
-            </a>
-
-            <!-- Link TikTok -->
-            <a href="https://tiktok.com/@usernamekamu" target="_blank" class="channel-card">
-                <div class="channel-info">
-                    <div class="channel-icon tt-bg">
-                        <i class="fa-brands fa-tiktok"></i>
-                    </div>
-                    <div class="channel-text">
-                        <h3>TikTok Official</h3>
-                        <span>Tonton konten & live streaming</span>
-                    </div>
-                </div>
-                <div class="channel-action"><i class="fa-solid fa-chevron-right"></i></div>
-            </a>
-
-            <!-- Link Roblox Private Server -->
-            <a href="https://www.roblox.com/games/CONTOH_SERVER" target="_blank" class="channel-card">
-                <div class="channel-info">
-                    <div class="channel-icon rbx-bg">
-                        <i class="fa-solid fa-gamepad"></i>
-                    </div>
-                    <div class="channel-text">
-                        <h3>Roblox Private Server</h3>
-                        <span>Mabar bareng tanpa lag / no public</span>
-                    </div>
-                </div>
-                <div class="channel-action"><i class="fa-solid fa-chevron-right"></i></div>
-            </a>
-
-        </div>
-
-        <!-- Bagian Footer & View Counter -->
-        <div class="footer-info">
-            <span>&copy; 2026 Rian</span>
-            <div class="view-counter">
-                <i class="fa-solid fa-eye"></i>
-                <span id="visitor-count">000000</span>
             </div>
         </div>
     </div>
 
-    <!-- Script Sederhana untuk View Counter (Otomatis Bertambah) -->
+    <!-- Script JavaScript untuk Fitur Search sederhana -->
     <script>
-        // Menggunakan API publik gratis (api.countapi.xyz atau alternatifnya)
-        // Jika ingin langsung tes, kita buat logika localStorage/counter sederhana
-        fetch('https://api.counterapi.dev/v1/github-io-hub/views/up')
-            .then(response => response.json())
-            .then(data => {
-                let count = data.value || 1;
-                // Format angka jadi 6 digit (contoh: 000045)
-                document.getElementById('visitor-count').innerText = String(count).padStart(6, '0');
-            })
-            .catch(error => {
-                // Fallback jika API sedang gangguan
-                document.getElementById('visitor-count').innerText = "000001";
-            });
+        function searchScript() {
+            let input = document.getElementById('searchInput').value.toLowerCase();
+            let cards = document.getElementsByClassName('script-card');
+
+            for (let i = 0; i < cards.length; i++) {
+                let title = cards[i].getAttribute('data-title');
+                if (title.includes(input)) {
+                    cards[i].style.display = "";
+                } else {
+                    cards[i].style.display = "none";
+                }
+            }
+        }
     </script>
+
 </body>
 </html>
