@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Entropy-Script</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>UPLOAD SCRIPT</h1>
+        <p>Tambah skrip baru agar langsung muncul di halaman utama</p>
+    </header>
+
+    <div class="admin-link">
+        <a href="index.html">← Kembali ke Beranda</a>
+    </div>
+
+    <div class="admin-form-container">
+        <form id="uploadForm" onsubmit="saveScript(event)">
+            <div class="form-group">
+                <label>Judul Skrip:</label>
+                <input type="text" id="scriptTitle" placeholder="Contoh: Blox Fruits Auto Farm..." required>
+            </div>
+            
+            <div class="form-group">
+                <label>Link Gambar Thumbnail (URL):</label>
+                <input type="text" id="scriptImage" placeholder="https://imgur.com/contoh.jpg" required>
+            </div>
+
+            <div class="form-group">
+                <label>Link Skrip (Pastebin / Luarmor):</label>
+                <input type="text" id="scriptLink" placeholder="https://pastebin.com/..." required>
+            </div>
+
+            <button type="submit" class="btn-submit">Publish Script Sekarang</button>
+        </form>
+    </div>
+
+    <script>
+        function saveScript(event) {
+            event.preventDefault();
+
+            let title = document.getElementById('scriptTitle').value;
+            let image = document.getElementById('scriptImage').value;
+            let link = document.getElementById('scriptLink').value;
+
+            let scripts = JSON.parse(localStorage.getItem('entropy_scripts')) || [];
+
+            scripts.unshift({
+                title: title,
+                image: image,
+                link: link
+            });
+
+            localStorage.setItem('entropy_scripts', JSON.stringify(scripts));
+
+            alert('Skrip Berhasil Ditambahkan!');
+            window.location.href = 'index.html';
+        }
+    </script>
+
+</body>
+</html>
