@@ -5,12 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - Entropy-Script</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Cropper.js CSS untuk fitur crop foto galeri -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css"/>
+    <style>
+        .img-container {
+            max-width: 100%;
+            max-height: 300px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .img-container img {
+            max-width: 100%;
+            display: block;
+        }
+        .btn-crop {
+            background-color: #333;
+            color: #ffbb00;
+            border: 1px solid #ffbb00;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: none;
+            width: 100%;
+        }
+        .btn-crop:hover {
+            background-color: #ffbb00;
+            color: #000;
+        }
+        #croppedPreview {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+            border: 1px dashed #ffbb00;
+        }
+    </style>
 </head>
 <body>
 
     <header>
-        <h1>UPLOAD SCRIPT</h1>
-        <p>Add a new script to display it on the main page</p>
+        <h1>ADMIN UPLOAD PANEL</h1>
+        <p>Upload thumbnail, crop it, and send it straight to your Discord review channel.</p>
     </header>
 
     <div class="admin-link">
@@ -19,46 +58,144 @@
 
     <!-- Upload Form UI -->
     <div class="admin-form-container">
-        <form id="uploadForm" onsubmit="saveScript(event)">
+        <form id="uploadForm" onsubmit="sendToDiscord(event)">
+            
             <div class="form-group">
                 <label>Script Title:</label>
                 <input type="text" id="scriptTitle" placeholder="Example: Blox Fruits Auto Farm..." required>
             </div>
             
+            <!-- Pilih Gambar dari Galeri HP -->
             <div class="form-group">
-                <label>Thumbnail Image URL:</label>
-                <input type="text" id="scriptImage" placeholder="https://imgur.com/example.jpg" required>
+                <label>Select Image from Gallery:</label>
+                <input type="file" id="imageInput" accept="image/*" style="padding: 8px; background: #0f0f0f; color: #fff; border: 1px solid #333; border-radius: 8px; width: 100%;">
             </div>
+
+            <!-- Area Crop Gambar -->
+            <div class="img-container" id="cropperArea">
+                <img id="sourceImage" alt="Source">
+            </div>
+            <button type="button" class="btn-crop" id="cropBtn" onclick="performCrop()">Crop & Resize Image ✂️</button>
+
+            <!-- Preview Hasil Crop -->
+            <img id="croppedPreview" alt="Cropped Preview">
 
             <div class="form-group">
                 <label>Script Link (Pastebin / Luarmor):</label>
                 <input type="text" id="scriptLink" placeholder="https://pastebin.com/..." required>
             </div>
 
-            <button type="submit" class="btn-submit">Publish Script Now</button>
+            <button type="submit" class="btn-submit" id="submitBtn">Send to Discord for Review</button>
         </form>
     </div>
 
+    <!-- Cropper.js Script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script>
-        function saveScript(event) {
+        let cropper;
+        let finalImageUrl = "";
+        const imageInput = document.getElementById('imageInput');
+        const sourceImage = document.getElementById('sourceImage');
+        const cropperArea = document.getElementById('cropperArea');
+        const cropBtn = document.getElementById('cropBtn');
+        const croppedPreview = document.getElementById('croppedPreview');
+
+        // Pilih gambar dari galeri
+        imageInput.addEventListener('change', function (e) {
+            let files = e.target.files;
+            if (files && files.length > 0) {
+                let file = files.item(0);
+                let reader = new FileReader();
+                reader.onload = function (event) {
+                    sourceImage.src = event.target.result;
+                    cropperArea.style.display = 'block';
+                    cropBtn.style.display = 'block';
+
+                    if (cropper) {
+                        cropper.destroy();
+                    }
+
+                    cropper = new Cropper(sourceImage, {
+                        aspectRatio: 16 / 9,
+                        viewMode: 1,
+                    });
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Proses crop gambar agar tidak terlalu besar
+        function performCrop() {
+            if (cropper) {
+                let canvas = cropper.getCroppedCanvas({
+                    width: 600,
+                    height: 337
+                });
+
+                // Diubah ke format base64
+                finalImageUrl = canvas.toDataURL('image/jpeg', 0.8);
+                
+                croppedPreview.src = finalImageUrl;
+                croppedPreview.style.display = 'block';
+
+                alert('Image cropped successfully!');
+            }
+        }
+
+        // Kirim data langsung ke Discord Webhook
+        async function sendToDiscord(event) {
             event.preventDefault();
 
             let title = document.getElementById('scriptTitle').value;
-            let image = document.getElementById('scriptImage').value;
             let link = document.getElementById('scriptLink').value;
+            let submitBtn = document.getElementById('submitBtn');
 
-            let scripts = JSON.parse(localStorage.getItem('entropy_scripts')) || [];
+            if (!finalImageUrl) {
+                alert('Please select and crop an image first!');
+                return;
+            }
 
-            scripts.unshift({
-                title: title,
-                image: image,
-                link: link
-            });
+            submitBtn.innerText = "Sending to Discord...";
+            submitBtn.disabled = true;
 
-            localStorage.setItem('entropy_scripts', JSON.stringify(scripts));
+            // Format pesan Embed Discord
+            const webhookURL = "https://discord.com/api/webhooks/1568556367369740369/SnjJPXyLeUjCKal5N_9V69PU_624k8ZmbO7dQE-ofmTql4puiKHOJuyP9uefKQngIJtp";
+            
+            const discordPayload = {
+                content: "🚨 **New Script Submission for Review!**",
+                embeds: [{
+                    title: title,
+                    description: `**Script Link:** ${link}\n\n*(Review this script before publishing to the main website)*`,
+                    color: 16753920, // Warna kuning khas web kamu
+                    image: {
+                        url: finalImageUrl
+                    }
+                }]
+            };
 
-            alert('Script successfully added!');
-            window.location.href = 'index.html';
+            try {
+                let response = await fetch(webhookURL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(discordPayload)
+                });
+
+                if (response.ok || response.status === 204) {
+                    alert('Script successfully sent to your Discord channel for review!');
+                    window.location.reload();
+                } else {
+                    alert('Failed to send to Discord. Check console for details.');
+                    submitBtn.innerText = "Send to Discord for Review";
+                    submitBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error(error);
+                alert('An error occurred while sending to Discord.');
+                submitBtn.innerText = "Send to Discord for Review";
+                submitBtn.disabled = false;
+            }
         }
     </script>
 
