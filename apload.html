@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Script - Entropy Hub</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css"/>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f0f0f; color: #fff; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 40px auto; background: #161616; padding: 25px; border-radius: 12px; border: 1px solid #333; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 14px; color: #ccc; }
+        .form-group input { width: 100%; padding: 10px; background: #0f0f0f; color: #fff; border: 1px solid #333; border-radius: 6px; box-sizing: border-box; }
+        .img-container { max-width: 100%; max-height: 250px; margin-bottom: 15px; display: none; }
+        .img-container img { max-width: 100%; display: block; }
+        .btn-crop { background-color: #222; color: #ffbb00; border: 1px solid #ffbb00; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 15px; display: none; width: 100%; }
+        #croppedPreview { width: 100%; height: 140px; object-fit: cover; border-radius: 6px; margin-bottom: 15px; display: none; border: 1px dashed #ffbb00; }
+        .cooldown-info { font-size: 12px; color: #f59e0b; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Upload Script</h2>
+        <p style="color: #888; font-size: 13px; margin-bottom: 20px;">Your script will be reviewed before appearing on the homepage.</p>
+        
+        <form id="publicUploadForm" onsubmit="submitPublicScript(event)">
+            <div class="form-group">
+                <label>Hub / Creator Name:</label>
+                <input type="text" id="hubName" placeholder="e.g. Entropy Hub" required>
+                <div id="cooldownText" class="cooldown-info"></div>
+            </div>
+
+            <div class="form-group">
+                <label>Script Title:</label>
+                <input type="text" id="scriptTitle" placeholder="e.g. Blox Fruits Auto Farm" required>
+            </div>
+
+            <div class="form-group">
+                <label>Thumbnail Image:</label>
+                <input type="file" id="imageInput" accept="image/*">
+            </div>
+
+            <div class="img-container" id="cropperArea">
+                <img id="sourceImage" alt="Source">
+            </div>
+            <button type="button" class="btn-crop" id="cropBtn" onclick="performCrop()">Crop & Resize Image ✂️</button>
+            <img id="croppedPreview" alt="Cropped Preview">
+
+            <div class="form-group">
+                <label>Script Link:</label>
+                <input type="text" id="scriptLink" placeholder="https://pastebin.com/raw/..." required>
+            </div>
+
+            <button type="submit" id="submitBtn" style="width: 100%; background: #28a745; color: white; padding: 12px; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px;">Submit to Queue 📥</button>
+        </form>
+        
+        <p style="text-align: center; margin-top: 20px;"><a href="index.html" style="color: #38bdf8; text-decoration: none;">← Back to Homepage</a></p>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script>
+        const QUEUE_BIN_ID = "6aef24a9ac6210605a7541d0";
+        const MASTER_KEY = "$2a$10$7kUozSyzkNytbUxnN7/kv.xInV14ItUgvNAWdjKEswZ0M.DDWgL/e";
+
+        let cropper;
+        let finalImageUrl = "";
+
+        window.onload = function() {
+            let savedHub = localStorage.getItem('user_hub_name') || "";
+            let lastChange = parseInt(localStorage.getItem('hub_last_change_time') || "0");
+            let now = new Date().getTime();
+            let cooldownTime = 7 * 24 * 60 * 60 * 1000;
+
+            let hubInput = document.getElementById('hubName');
+            let cooldownText = document.getElementById('cooldownText');
+
+            hubInput.value = savedHub;
+
+            if (savedHub && (now - lastChange < cooldownTime)) {
+                let timeLeft = cooldownTime - (now - lastChange);
+                let daysLeft = Math.ceil(timeLeft / (1000 * 60 * 60 * 24));
+                hubInput.disabled = true;
+                cooldownText.innerText = `🔒 Hub name is locked. You can change it again in ${daysLeft} day(s).`;
+            } else {
+                hubInput.disabled = false;
+                cooldownText.innerText = `✨ You can set or update your Hub name freely. Once changed, it will lock for 7 days.`;
+            }
+        };
+
+        const imageInput = document.getElementById('imageInput');
+        const sourceImage = document.getElementById('sourceImage');
+        const cropperArea = document.getElementById('cropperArea');
+        const cropBtn = document.getElementById('cropBtn');
+        const croppedPreview = document.getElementById('croppedPreview');
+
+        imageInput.addEventListener('change', function (e) {
+            let files = e.target.files;
+            if (files && files.length > 0) {
+                let file = files.item(0);
+                let reader = new FileReader();
+                reader.onload = function (event) {
+                    sourceImage.src = event.target.result;
+                    cropperArea.style.display = 'block';
+                    cropBtn.style.display = 'block';
+                    croppedPreview.style.display = 'none';
+
+                    if (cropper) { cropper.destroy(); }
+                    cropper = new Cropper(sourceImage, { aspectRatio: 16 / 9, viewMode: 1 });
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function performCrop() {
+            if (cropper) {
+                let canvas = cropper.getCroppedCanvas({ width: 400, height: 225 });
+                finalImageUrl = canvas.toDataURL('image/jpeg', 0.6);
+                
+                croppedPreview.src = finalImageUrl;
+                croppedPreview.style.display = 'block';
+                cropperArea.style.display = 'none';
+                cropBtn.style.display = 'none';
+                cropper.destroy();
+                alert('Image successfully cropped!');
+            }
+        }
+
+        async function submitPublicScript(event) {
+            event.preventDefault();
+            let hubName = document.getElementById('hubName').value.trim();
+            let title = document.getElementById('scriptTitle').value.trim();
+            let link = document.getElementById('scriptLink').value.trim();
+            let submitBtn = document.getElementById('submitBtn');
+
+            if (!finalImageUrl) {
+                alert('Please select and crop a thumbnail image first!');
+                return;
+            }
+
+            let savedHub = localStorage.getItem('user_hub_name') || "";
+            let lastChange = parseInt(localStorage.getItem('hub_last_change_time') || "0");
+            let now = new Date().getTime();
+            let cooldownTime = 7 * 24 * 60 * 60 * 1000;
+
+            if (savedHub && savedHub !== hubName && (now - lastChange < cooldownTime)) {
+                let timeLeft = cooldownTime - (now - lastChange);
+                let daysLeft = Math.ceil(timeLeft / (1000 * 60 * 60 * 24));
+                alert(`Error: You cannot change your Hub name yet. Cooldown is active for another ${daysLeft} day(s).`);
+                return;
+            }
+
+            if (savedHub !== hubName) {
+                localStorage.setItem('user_hub_name', hubName);
+                localStorage.setItem('hub_last_change_time', now.toString());
+            }
+
+            submitBtn.innerText = "Submitting...";
+            submitBtn.disabled = true;
+
+            try {
+                let res = await fetch(`https://api.jsonbin.io/v3/b/${QUEUE_BIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': MASTER_KEY }
+                });
+                let data = await res.json();
+                let queue = data.record || [];
+                if (!Array.isArray(queue)) queue = [];
+
+                queue.unshift({ hubName, title, image: finalImageUrl, link });
+
+                let putRes = await fetch(`https://api.jsonbin.io/v3/b/${QUEUE_BIN_ID}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': MASTER_KEY },
+                    body: JSON.stringify(queue)
+                });
+
+                if (putRes.ok) {
+                    alert('Script successfully submitted to the review queue!');
+                    window.location.href = 'index.html';
+                } else {
+                    alert('Failed to submit script.');
+                    submitBtn.innerText = "Submit to Queue 📥";
+                    submitBtn.disabled = false;
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Connection error.');
+                submitBtn.innerText = "Submit to Queue 📥";
+                submitBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
