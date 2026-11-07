@@ -54,7 +54,9 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script>
-        const NPOINT_ID = "c3aac946d63fa3d2f04c";
+        // KREDENSIAL JSONBIN KAMU
+        const BIN_ID = "6aef0375ac6210605a74f341";
+        const MASTER_KEY = "$2a$10$7kUozSyzkNytbUxnN7/kv.xInV14ItUgvNAWdjKEswZ0M.DDWgL/e";
 
         let cropper;
         let finalImageUrl = "";
@@ -84,7 +86,7 @@
 
         function performCrop() {
             if (cropper) {
-                // Diperkecil ukurannya (width 400px & kualitas 0.6) agar aman untuk database gratis
+                // Diperkecil ukurannya (width 400px & kualitas 0.6) agar aman dan ringan
                 let canvas = cropper.getCroppedCanvas({ width: 400, height: 225 });
                 finalImageUrl = canvas.toDataURL('image/jpeg', 0.6);
                 
@@ -112,10 +114,13 @@
             submitBtn.disabled = true;
 
             try {
-                // 1. Ambil data lama dari npoint
-                let getRes = await fetch(`https://api.npoint.io/${NPOINT_ID}`);
-                let currentScripts = await getRes.json();
-                
+                // 1. Ambil data lama dari JSONBin
+                let getRes = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': MASTER_KEY }
+                });
+                let getData = await getRes.json();
+                let currentScripts = getData.record || [];
+
                 if (!Array.isArray(currentScripts)) {
                     currentScripts = [];
                 }
@@ -127,10 +132,13 @@
                     link: link
                 });
 
-                // 3. Simpan kembali data terbaru ke npoint
-                let putRes = await fetch(`https://api.npoint.io/${NPOINT_ID}`, {
+                // 3. Simpan kembali data terbaru ke JSONBin
+                let putRes = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': MASTER_KEY
+                    },
                     body: JSON.stringify(currentScripts)
                 });
 
@@ -138,7 +146,7 @@
                     alert('Script successfully published online for everyone!');
                     window.location.href = 'index.html';
                 } else {
-                    alert('Failed to publish.');
+                    alert('Failed to publish. Check your settings.');
                     submitBtn.innerText = "Publish Script Now 🚀";
                     submitBtn.disabled = false;
                 }
