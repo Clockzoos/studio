@@ -41,21 +41,40 @@
             let container = document.getElementById('scriptList');
             container.innerHTML = "";
 
-            scripts.forEach((item) => {
+            scripts.forEach((item, index) => {
                 container.innerHTML += `
                     <div class="script-card" data-title="${item.title.toLowerCase()}">
+                        <!-- Tombol Delete di Kanan Atas Kartu -->
+                        <button class="btn-delete" onclick="deleteScript(${index})" title="Hapus Skrip">×</button>
+                        
                         <img src="${item.image}" alt="Thumbnail">
                         <div class="card-content">
                             <h3>${item.title}</h3>
                             <div class="card-footer">
                                 <span>Entropy-Script</span>
-                                <!-- Langsung buka link tujuan tanpa detail.html -->
                                 <a href="${item.link}" target="_blank">Get Script →</a>
                             </div>
                         </div>
                     </div>
                 `;
             });
+        }
+
+        // Fungsi untuk Menghapus Skrip
+        function deleteScript(index) {
+            let confirmDelete = confirm("Yakin ingin menghapus skrip ini?");
+            if (confirmDelete) {
+                let scripts = JSON.parse(localStorage.getItem('entropy_scripts')) || [];
+                
+                // Hapus data berdasarkan urutan index-nya
+                scripts.splice(index, 1);
+                
+                // Simpan ulang ke LocalStorage
+                localStorage.setItem('entropy_scripts', JSON.stringify(scripts));
+                
+                // Refresh tampilan kartu
+                loadScripts();
+            }
         }
 
         function searchScript() {
