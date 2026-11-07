@@ -22,13 +22,14 @@
     </div>
 
     <script>
-        const NPOINT_ID = "c3aac946d63fa3d2f04c";
+        const BIN_ID = "6aef0375ac6210605a74f341";
 
         async function loadScripts() {
             let container = document.getElementById('scriptList');
             try {
-                let response = await fetch(`https://api.npoint.io/${NPOINT_ID}`);
-                let scripts = await response.json();
+                let response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`);
+                let data = await response.json();
+                let scripts = data.record || [];
 
                 container.innerHTML = "";
 
