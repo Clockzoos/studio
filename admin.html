@@ -5,79 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - Entropy-Script</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Cropper.js CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css"/>
     <style>
-        .img-container {
-            max-width: 100%;
-            max-height: 300px;
-            margin-bottom: 15px;
-            display: none;
-        }
-        .img-container img {
-            max-width: 100%;
-            display: block;
-        }
-        .btn-crop {
-            background-color: #333;
-            color: #ffbb00;
-            border: 1px solid #ffbb00;
-            padding: 8px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            margin-bottom: 15px;
-            display: none;
-            width: 100%;
-        }
-        .btn-crop:hover {
-            background-color: #ffbb00;
-            color: #000;
-        }
-        #croppedPreview {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            display: none;
-            border: 1px dashed #ffbb00;
-        }
+        .img-container { max-width: 100%; max-height: 300px; margin-bottom: 15px; display: none; }
+        .img-container img { max-width: 100%; display: block; }
+        .btn-crop { background-color: #333; color: #ffbb00; border: 1px solid #ffbb00; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-bottom: 15px; display: none; width: 100%; }
+        #croppedPreview { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 15px; display: none; border: 1px dashed #ffbb00; }
     </style>
 </head>
 <body>
 
     <header>
         <h1>ADMIN UPLOAD PANEL</h1>
-        <p>Upload thumbnail, crop it, and publish your script directly to the website.</p>
+        <p>Upload thumbnail, crop it, and publish instantly!</p>
     </header>
 
     <div class="admin-link">
         <a href="index.html">← Back to Home</a>
     </div>
 
-    <!-- Upload Form UI -->
     <div class="admin-form-container">
-        <form id="uploadForm" onsubmit="saveScriptLocally(event)">
-            
+        <form id="uploadForm" onsubmit="publishScript(event)">
             <div class="form-group">
                 <label>Script Title:</label>
                 <input type="text" id="scriptTitle" placeholder="Example: Blox Fruits Auto Farm..." required>
             </div>
             
-            <!-- Pilih Gambar dari Galeri HP -->
             <div class="form-group">
                 <label>Select Image from Gallery:</label>
                 <input type="file" id="imageInput" accept="image/*" style="padding: 8px; background: #0f0f0f; color: #fff; border: 1px solid #333; border-radius: 8px; width: 100%;">
             </div>
 
-            <!-- Area Crop Gambar -->
             <div class="img-container" id="cropperArea">
                 <img id="sourceImage" alt="Source">
             </div>
             <button type="button" class="btn-crop" id="cropBtn" onclick="performCrop()">Crop & Resize Image ✂️</button>
 
-            <!-- Preview Hasil Crop -->
             <img id="croppedPreview" alt="Cropped Preview">
 
             <div class="form-group">
@@ -85,13 +48,14 @@
                 <input type="text" id="scriptLink" placeholder="https://pastebin.com/..." required>
             </div>
 
-            <button type="submit" class="btn-submit" id="submitBtn">Publish Script Now</button>
+            <button type="submit" class="btn-submit" id="submitBtn">Publish Script Now 🚀</button>
         </form>
     </div>
 
-    <!-- Cropper.js Script -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script>
+        const NPOINT_ID = "c3aac946d63fa3d2f04c";
+
         let cropper;
         let finalImageUrl = "";
         const imageInput = document.getElementById('imageInput');
@@ -100,7 +64,6 @@
         const cropBtn = document.getElementById('cropBtn');
         const croppedPreview = document.getElementById('croppedPreview');
 
-        // Pilih gambar dari galeri
         imageInput.addEventListener('change', function (e) {
             let files = e.target.files;
             if (files && files.length > 0) {
@@ -112,72 +75,79 @@
                     cropBtn.style.display = 'block';
                     croppedPreview.style.display = 'none';
 
-                    if (cropper) {
-                        cropper.destroy();
-                    }
-
-                    cropper = new Cropper(sourceImage, {
-                        aspectRatio: 16 / 9,
-                        viewMode: 1,
-                    });
+                    if (cropper) { cropper.destroy(); }
+                    cropper = new Cropper(sourceImage, { aspectRatio: 16 / 9, viewMode: 1 });
                 };
                 reader.readAsDataURL(file);
             }
         });
 
-        // Proses crop gambar
         function performCrop() {
             if (cropper) {
-                let canvas = cropper.getCroppedCanvas({
-                    width: 600,
-                    height: 337
-                });
-
+                let canvas = cropper.getCroppedCanvas({ width: 600, height: 337 });
                 finalImageUrl = canvas.toDataURL('image/jpeg', 0.8);
                 
                 croppedPreview.src = finalImageUrl;
                 croppedPreview.style.display = 'block';
-
                 cropperArea.style.display = 'none';
                 cropBtn.style.display = 'none';
-
                 cropper.destroy();
-
                 alert('Image cropped successfully!');
             }
         }
 
-        // Simpan skrip secara lokal agar langsung tampil di web utama
-        function saveScriptLocally(event) {
+        async function publishScript(event) {
             event.preventDefault();
-
             let title = document.getElementById('scriptTitle').value;
             let link = document.getElementById('scriptLink').value;
+            let submitBtn = document.getElementById('submitBtn');
 
             if (!finalImageUrl) {
                 alert('Please select and crop an image first!');
                 return;
             }
 
-            // Ambil data skrip yang sudah ada di memori browser
-            let scripts = JSON.parse(localStorage.getItem('entropy_scripts')) || [];
+            submitBtn.innerText = "Publishing to Website...";
+            submitBtn.disabled = true;
 
-            // Masukkan skrip baru ke urutan paling atas
-            scripts.unshift({
-                title: title,
-                image: finalImageUrl,
-                link: link
-            });
+            try {
+                // 1. Ambil data lama dari npoint
+                let getRes = await fetch(`https://api.npoint.io/${NPOINT_ID}`);
+                let currentScripts = await getRes.json();
+                
+                if (!Array.isArray(currentScripts)) {
+                    currentScripts = [];
+                }
 
-            // Simpan kembali
-            localStorage.setItem('entropy_scripts', JSON.stringify(scripts));
+                // 2. Tambah skrip baru ke urutan paling atas
+                currentScripts.unshift({
+                    title: title,
+                    image: finalImageUrl,
+                    link: link
+                });
 
-            alert('Script successfully published to your website!');
-            
-            // Redirect otomatis kembali ke halaman utama
-            window.location.href = 'index.html';
+                // 3. Simpan kembali data terbaru ke npoint
+                let putRes = await fetch(`https://api.npoint.io/${NPOINT_ID}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(currentScripts)
+                });
+
+                if (putRes.ok) {
+                    alert('Script successfully published online for everyone!');
+                    window.location.href = 'index.html';
+                } else {
+                    alert('Failed to publish.');
+                    submitBtn.innerText = "Publish Script Now 🚀";
+                    submitBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error(error);
+                alert('An error occurred.');
+                submitBtn.innerText = "Publish Script Now 🚀";
+                submitBtn.disabled = false;
+            }
         }
     </script>
-
 </body>
 </html>
