@@ -22,14 +22,14 @@
     </div>
 
     <script>
-        const BIN_ID = "6aef0375ac6210605a74f341";
+        const BIN_ID = "6aef05abac6210605a74f72a";
 
         async function loadScripts() {
             let container = document.getElementById('scriptList');
             try {
                 let response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`);
-                let data = await response.json();
-                let scripts = data.record || [];
+                let json = await response.json();
+                let scripts = json.record || json;
 
                 container.innerHTML = "";
 
@@ -40,7 +40,7 @@
 
                 scripts.forEach((item) => {
                     container.innerHTML += `
-                        <div class="script-card" data-title="${item.title.toLowerCase()}">
+                        <div class="script-card" data-title="${(item.title || '').toLowerCase()}">
                             <img src="${item.image}" alt="Thumbnail">
                             <div class="card-content">
                                 <h3>${item.title}</h3>
@@ -53,6 +53,7 @@
                     `;
                 });
             } catch (error) {
+                console.error(error);
                 container.innerHTML = `<p style="text-align: center; color: #ff5555; grid-column: 1 / -1; margin-top: 20px;">Failed to load scripts.</p>`;
             }
         }
