@@ -13,56 +13,58 @@
         <p>Free Roblox scripts, updated regularly. Find one, hit Get Script, and you're set.</p>
     </header>
 
-    <!-- Search Bar -->
     <div class="search-container">
         <input type="text" id="searchInput" placeholder="Search scripts..." onkeyup="searchScript()">
     </div>
 
-    <!-- Dynamic Script Grid (Dikosongkan total di awal) -->
     <div class="script-grid" id="scriptList">
-        <!-- Akan terisi otomatis jika ada data -->
+        <p style="text-align: center; color: #777; grid-column: 1 / -1; margin-top: 20px;" id="loadingText">Loading scripts...</p>
     </div>
 
     <script>
-        function loadScripts() {
-            // Mengambil data dari localStorage, jika kosong maka array-nya benar-benar [] (kosong)
-            let scripts = JSON.parse(localStorage.getItem('entropy_scripts')) || [];
+        const NPOINT_ID = "c3aac946d63fa3d2f04c";
 
+        async function loadScripts() {
             let container = document.getElementById('scriptList');
-            container.innerHTML = "";
+            try {
+                let response = await fetch(`https://api.npoint.io/${NPOINT_ID}`);
+                let scripts = await response.json();
 
-            // Jika kosong, tampilkan tulisan bersih bahwa belum ada skrip
-            if (scripts.length === 0) {
-                container.innerHTML = `<p style="text-align: center; color: #777; grid-column: 1 / -1; margin-top: 20px;">No scripts available yet.</p>`;
-                return;
-            }
+                container.innerHTML = "";
 
-            scripts.forEach((item) => {
-                container.innerHTML += `
-                    <div class="script-card" data-title="${item.title.toLowerCase()}">
-                        <img src="${item.image}" alt="Thumbnail">
-                        <div class="card-content">
-                            <h3>${item.title}</h3>
-                            <div class="card-footer">
-                                <span>Entropy-Script</span>
-                                <a href="${item.link}" target="_blank">Get Script →</a>
+                if (!Array.isArray(scripts) || scripts.length === 0) {
+                    container.innerHTML = `<p style="text-align: center; color: #777; grid-column: 1 / -1; margin-top: 20px;">No scripts available yet.</p>`;
+                    return;
+                }
+
+                scripts.forEach((item) => {
+                    container.innerHTML += `
+                        <div class="script-card" data-title="${item.title.toLowerCase()}">
+                            <img src="${item.image}" alt="Thumbnail">
+                            <div class="card-content">
+                                <h3>${item.title}</h3>
+                                <div class="card-footer">
+                                    <span>Entropy-Script</span>
+                                    <a href="${item.link}" target="_blank">Get Script →</a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `;
-            });
+                    `;
+                });
+            } catch (error) {
+                container.innerHTML = `<p style="text-align: center; color: #ff5555; grid-column: 1 / -1; margin-top: 20px;">Failed to load scripts.</p>`;
+            }
         }
 
-        // Search Function
         function searchScript() {
             let input = document.getElementById('searchInput').value.toLowerCase();
             let cards = document.getElementsByClassName('script-card');
 
             for (let i = 0; i < cards.length; i++) {
                 let title = cards[i].getAttribute('data-title');
-                if (title.includes(input)) {
+                if (title && title.includes(input)) {
                     cards[i].style.display = "";
-                } else {
+                } else if(cards[i]) {
                     cards[i].style.display = "none";
                 }
             }
@@ -70,6 +72,5 @@
 
         window.onload = loadScripts;
     </script>
-
 </body>
 </html>
