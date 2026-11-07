@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,31 +10,32 @@
 
     <header>
         <h1>UPLOAD SCRIPT</h1>
-        <p>Tambah skrip baru agar langsung muncul di halaman utama</p>
+        <p>Add a new script to display it on the main page</p>
     </header>
 
     <div class="admin-link">
-        <a href="index.html">← Kembali ke Beranda</a>
+        <a href="index.html">← Back to Home</a>
     </div>
 
+    <!-- Upload Form UI -->
     <div class="admin-form-container">
         <form id="uploadForm" onsubmit="saveScript(event)">
             <div class="form-group">
-                <label>Judul Skrip:</label>
-                <input type="text" id="scriptTitle" placeholder="Contoh: Blox Fruits Auto Farm..." required>
+                <label>Script Title:</label>
+                <input type="text" id="scriptTitle" placeholder="Example: Blox Fruits Auto Farm..." required>
             </div>
             
             <div class="form-group">
-                <label>Link Gambar Thumbnail (URL):</label>
-                <input type="text" id="scriptImage" placeholder="https://imgur.com/contoh.jpg" required>
+                <label>Thumbnail Image URL:</label>
+                <input type="text" id="scriptImage" placeholder="https://imgur.com/example.jpg" required>
             </div>
 
             <div class="form-group">
-                <label>Link Skrip (Pastebin / Luarmor):</label>
+                <label>Script Link (Pastebin / Luarmor):</label>
                 <input type="text" id="scriptLink" placeholder="https://pastebin.com/..." required>
             </div>
 
-            <button type="submit" class="btn-submit">Publish Script Sekarang</button>
+            <button type="submit" class="btn-submit">Publish Script Now</button>
         </form>
     </div>
 
@@ -56,7 +57,7 @@
 
             localStorage.setItem('entropy_scripts', JSON.stringify(scripts));
 
-            alert('Skrip Berhasil Ditambahkan!');
+            alert('Script successfully added!');
             window.location.href = 'index.html';
         }
     </script>
