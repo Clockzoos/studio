@@ -82,31 +82,35 @@ header p {
     border: 1px solid #222;
     border-radius: 12px;
     overflow: hidden;
+    transition: 0.2s;
 }
 
-/* Styling Tombol Delete di Kanan Atas Kartu */
+.script-card:hover {
+    border-color: #444;
+}
+
+/* Styling Tombol Delete (Ikon Sampah) */
 .btn-delete {
     position: absolute;
     top: 10px;
     right: 10px;
-    background-color: rgba(255, 0, 0, 0.8);
-    color: #fff;
-    border: none;
-    width: 30px;
-    height: 30px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    width: 35px;
+    height: 35px;
     border-radius: 50%;
-    font-weight: bold;
-    font-size: 1rem;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 0.9rem;
     transition: 0.2s;
     z-index: 10;
 }
 
 .btn-delete:hover {
-    background-color: rgb(255, 0, 0);
+    background-color: #ff3333;
+    border-color: #ff3333;
     transform: scale(1.1);
 }
 
@@ -139,6 +143,78 @@ header p {
     font-weight: bold;
 }
 
+/* --- MODAL / POP-UP CUSTOM --- */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-box {
+    background-color: #161616;
+    border: 1px solid #333;
+    padding: 25px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 350px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+.modal-box h3 {
+    color: #ffbb00;
+    margin-bottom: 10px;
+    font-size: 1.3rem;
+}
+
+.modal-box p {
+    color: #b0b0b0;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-cancel, .btn-confirm-delete {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    transition: 0.2s;
+}
+
+.btn-cancel {
+    background-color: #222;
+    color: #fff;
+}
+
+.btn-cancel:hover {
+    background-color: #333;
+}
+
+.btn-confirm-delete {
+    background-color: #ff3333;
+    color: #fff;
+}
+
+.btn-confirm-delete:hover {
+    background-color: #e02828;
+}
+
+/* Form Admin Styling */
 .admin-form-container {
     max-width: 500px;
     margin: 0 auto;
@@ -165,6 +241,11 @@ header p {
     border: 1px solid #333;
     border-radius: 8px;
     color: #fff;
+    outline: none;
+}
+
+.form-group input:focus {
+    border-color: #ffbb00;
 }
 
 .btn-submit {
