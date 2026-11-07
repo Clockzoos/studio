@@ -54,8 +54,8 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script>
-        // KREDENSIAL JSONBIN KAMU
-        const BIN_ID = "6aef0375ac6210605a74f341";
+        // KREDENSIAL JSONBIN BARU KAMU
+        const BIN_ID = "6aef05abac6210605a74f72a";
         const MASTER_KEY = "$2a$10$7kUozSyzkNytbUxnN7/kv.xInV14ItUgvNAWdjKEswZ0M.DDWgL/e";
 
         let cropper;
@@ -86,7 +86,6 @@
 
         function performCrop() {
             if (cropper) {
-                // Diperkecil ukurannya (width 400px & kualitas 0.6) agar aman dan ringan
                 let canvas = cropper.getCroppedCanvas({ width: 400, height: 225 });
                 finalImageUrl = canvas.toDataURL('image/jpeg', 0.6);
                 
