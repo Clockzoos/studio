@@ -13,56 +13,33 @@
         <p>Free Roblox scripts, updated regularly. Find one, hit Get Script, and you're set.</p>
     </header>
 
-    <!-- Upload Panel Link -->
-    <div class="admin-link">
-        <a href="admin.html">+ Upload Script (Admin UI)</a>
-    </div>
-
     <!-- Search Bar -->
     <div class="search-container">
         <input type="text" id="searchInput" placeholder="Search scripts..." onkeyup="searchScript()">
     </div>
 
-    <!-- Dynamic Script Grid -->
+    <!-- Dynamic Script Grid (Dikosongkan total di awal) -->
     <div class="script-grid" id="scriptList">
-        <!-- Data loaded via JavaScript -->
-    </div>
-
-    <!-- CUSTOM DELETE MODAL (DI-SET DISPLAY NONE LANGSUNG DISINI) -->
-    <div id="deleteModal" class="modal-overlay" style="display: none;">
-        <div class="modal-box">
-            <h3>Delete Script?</h3>
-            <p>This action cannot be undone. The script will be permanently removed.</p>
-            <div class="modal-buttons">
-                <button class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
-                <button class="btn-confirm-delete" onclick="executeDelete()">Yes, Delete</button>
-            </div>
-        </div>
+        <!-- Akan terisi otomatis jika ada data -->
     </div>
 
     <script>
-        let scriptToDeleteIndex = null;
-
         function loadScripts() {
-            let scripts = JSON.parse(localStorage.getItem('entropy_scripts')) || [
-                {
-                    title: "[FREE UGC] milkXP! OP SCRIPT (SUPER EASY UGC)",
-                    image: "https://via.placeholder.com/300x150/222/ffbb00?text=MilkXP",
-                    link: "https://pastebin.com"
-                }
-            ];
+            // Mengambil data dari localStorage, jika kosong maka array-nya benar-benar [] (kosong)
+            let scripts = JSON.parse(localStorage.getItem('entropy_scripts')) || [];
 
             let container = document.getElementById('scriptList');
             container.innerHTML = "";
 
-            scripts.forEach((item, index) => {
+            // Jika kosong, tampilkan tulisan bersih bahwa belum ada skrip
+            if (scripts.length === 0) {
+                container.innerHTML = `<p style="text-align: center; color: #777; grid-column: 1 / -1; margin-top: 20px;">No scripts available yet.</p>`;
+                return;
+            }
+
+            scripts.forEach((item) => {
                 container.innerHTML += `
                     <div class="script-card" data-title="${item.title.toLowerCase()}">
-                        <!-- Delete Button -->
-                        <button class="btn-delete" onclick="openDeleteModal(${index})" title="Delete Script">
-                            🗑️
-                        </button>
-                        
                         <img src="${item.image}" alt="Thumbnail">
                         <div class="card-content">
                             <h3>${item.title}</h3>
@@ -74,29 +51,6 @@
                     </div>
                 `;
             });
-        }
-
-        // Open Custom Modal
-        function openDeleteModal(index) {
-            scriptToDeleteIndex = index;
-            document.getElementById('deleteModal').style.display = 'flex';
-        }
-
-        // Close Custom Modal
-        function closeDeleteModal() {
-            scriptToDeleteIndex = null;
-            document.getElementById('deleteModal').style.display = 'none';
-        }
-
-        // Execute Delete
-        function executeDelete() {
-            if (scriptToDeleteIndex !== null) {
-                let scripts = JSON.parse(localStorage.getItem('entropy_scripts')) || [];
-                scripts.splice(scriptToDeleteIndex, 1);
-                localStorage.setItem('entropy_scripts', JSON.stringify(scripts));
-                closeDeleteModal();
-                loadScripts();
-            }
         }
 
         // Search Function
