@@ -84,8 +84,9 @@
 
         function performCrop() {
             if (cropper) {
-                let canvas = cropper.getCroppedCanvas({ width: 600, height: 337 });
-                finalImageUrl = canvas.toDataURL('image/jpeg', 0.8);
+                // Diperkecil ukurannya (width 400px & kualitas 0.6) agar aman untuk database gratis
+                let canvas = cropper.getCroppedCanvas({ width: 400, height: 225 });
+                finalImageUrl = canvas.toDataURL('image/jpeg', 0.6);
                 
                 croppedPreview.src = finalImageUrl;
                 croppedPreview.style.display = 'block';
