@@ -89,7 +89,7 @@ header p {
     border-color: #444;
 }
 
-/* Styling Tombol Delete (Ikon Sampah) */
+/* Tombol Delete (Ikon Sampah) */
 .btn-delete {
     position: absolute;
     top: 10px;
@@ -143,9 +143,9 @@ header p {
     font-weight: bold;
 }
 
-/* --- MODAL / POP-UP CUSTOM --- */
+/* --- WAJIB ADA: display: none; agar modal tersembunyi di awal --- */
 .modal-overlay {
-    display: none;
+    display: none !important; 
     position: fixed;
     top: 0;
     left: 0;
