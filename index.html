@@ -14,11 +14,14 @@
         .container { max-width: 900px; margin: 0 auto; min-height: 60vh; padding-bottom: 50px; }
         .script-card { background: #161616; border: 1px solid #333; border-radius: 10px; padding: 15px; margin-bottom: 15px; display: flex; gap: 15px; align-items: center; }
         .script-card img { width: 120px; height: 68px; object-fit: cover; border-radius: 6px; }
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; }
-        .modal-content { background: #161616; padding: 25px; border-radius: 12px; width: 90%; max-width: 500px; border: 1px solid #333; color: #fff; max-height: 90vh; overflow-y: auto; }
+        
+        /* MODAL UMUM */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
+        .modal-content { background: #161616; padding: 25px; border-radius: 12px; width: 90%; max-width: 450px; border: 1px solid #333; color: #fff; text-align: center; }
+        
         .close-btn { float: right; font-size: 24px; cursor: pointer; color: #888; }
         .close-btn:hover { color: #fff; }
-        .form-group { margin-bottom: 12px; }
+        .form-group { margin-bottom: 12px; text-align: left; }
         .form-group label { display: block; margin-bottom: 5px; font-size: 14px; color: #ccc; }
         .form-group input { width: 100%; padding: 10px; background: #0f0f0f; color: #fff; border: 1px solid #333; border-radius: 6px; box-sizing: border-box; }
         .img-container { max-width: 100%; max-height: 250px; margin-bottom: 15px; display: none; }
@@ -50,7 +53,9 @@
             font-weight: bold;
         }
 
-        footer { text-align: center; margin-top: 50px; padding: 20px; color: #777; font-size: 13px; border-top: 1px solid #222; }
+        /* TOMBOL DISCORD MODAL */
+        .btn-discord { background: #5865F2; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block; margin-right: 10px; border: none; cursor: pointer; }
+        .btn-later { background: #333; color: white; padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -68,18 +73,26 @@
         </div>
     </div>
 
-    <!-- FLOATING VISITOR COUNTER (IKUT BERGERAK DI KANAN BAWAH) -->
+    <!-- FLOATING VISITOR COUNTER -->
     <div class="floating-counter">
         Views: <span id="visitorCount">Loading...</span>
     </div>
 
-    <footer>
-        <p>Entropy Script Hub &copy; 2026. All rights reserved.</p>
-    </footer>
+    <!-- DISCORD POPUP MODAL -->
+    <div id="discordModal" class="modal">
+        <div class="modal-content">
+            <h2>📢 Join Our Community!</h2>
+            <p style="color: #bbb; font-size: 14px; margin: 15px 0;">Join our Discord server for more updates, scripts, and support!</p>
+            <div style="margin-top: 20px;">
+                <button class="btn-discord" onclick="handleDiscordAction('join')">Join Discord</button>
+                <button class="btn-later" onclick="handleDiscordAction('later')">Later</button>
+            </div>
+        </div>
+    </div>
 
     <!-- UPLOAD MODAL -->
-    <div id="uploadModal" class="modal">
-        <div class="modal-content">
+    <div id="uploadModal" class="modal" style="text-align: left;">
+        <div class="modal-content" style="text-align: left;">
             <span class="close-btn" onclick="closeUploadModal()">&times;</span>
             <h2>Upload Script</h2>
             <p style="color: #888; font-size: 13px; margin-bottom: 15px;">Scripts will enter the review queue before going live.</p>
@@ -121,6 +134,7 @@
     <script>
         const PUBLIC_BIN_ID = "6aef05abac6210605a74f72a";
         const QUEUE_BIN_ID = "6aef24a9ac6210605a7541d0";
+        const VISITOR_BIN_ID = "6aef6a34ac6210605a75da3f"; 
         const MASTER_KEY = "$2a$10$7kUozSyzkNytbUxnN7/kv.xInV14ItUgvNAWdjKEswZ0M.DDWgL/e";
 
         let cropper;
@@ -158,17 +172,49 @@
             }
         }
 
-        // STABLE VISITOR COUNTER API
-        async function updateVisitorCount() {
+        // SISTEM PENCATAT VIEWS KE VISITOR BIN
+        async function trackAndLoadVisitorCount() {
             try {
-                // Menggunakan counterapi.dev yang stabil
-                let response = await fetch('https://api.counterapi.dev/v1/entropy-script-hub/visits/up');
-                let data = await response.json();
-                document.getElementById('visitorCount').innerText = data.count.toLocaleString();
+                let hasCounted = sessionStorage.getItem('entropy_visit_recorded');
+
+                let res = await fetch(`https://api.jsonbin.io/v3/b/${VISITOR_BIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': MASTER_KEY }
+                });
+                let data = await res.json();
+                let visitorData = data.record || {};
+                let visitorsList = visitorData.visitors || [];
+
+                if (!hasCounted) {
+                    visitorsList.push({ time: new Date().toISOString() });
+                    visitorData.visitors = visitorsList;
+
+                    await fetch(`https://api.jsonbin.io/v3/b/${VISITOR_BIN_ID}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'X-Master-Key': MASTER_KEY },
+                        body: JSON.stringify(visitorData)
+                    });
+
+                    sessionStorage.setItem('entropy_visit_recorded', 'true');
+                }
+
+                document.getElementById('visitorCount').innerText = visitorsList.length.toLocaleString();
+
+                if (!localStorage.getItem('discord_popup_shown')) {
+                    document.getElementById('discordModal').style.display = 'flex';
+                }
+
             } catch (err) {
-                console.error("Failed to load visitor count", err);
-                // Fallback jika API utama sibuk
+                console.error("Visitor tracker error", err);
                 document.getElementById('visitorCount').innerText = "1+";
+            }
+        }
+
+        function handleDiscordAction(action) {
+            localStorage.setItem('discord_popup_shown', 'true');
+            document.getElementById('discordModal').style.display = 'none';
+
+            if (action === 'join') {
+                window.open('https://discord.gg/tAd4tYUE', '_blank');
             }
         }
 
@@ -260,7 +306,7 @@
             if (savedHub && savedHub !== hubName && (now - lastChange < cooldownTime)) {
                 let timeLeft = cooldownTime - (now - lastChange);
                 let daysLeft = Math.ceil(timeLeft / (1000 * 60 * 60 * 24));
-                alert(`Error: You cannot change your Hub name yet. Cooldown is active for another ${daysLeft} day(s).` );
+                alert(`Error: You cannot change your Hub name yet. Cooldown is active for another ${daysLeft} day(s).`);
                 return;
             }
 
@@ -307,7 +353,7 @@
 
         window.onload = function() {
             loadPublicScripts();
-            updateVisitorCount();
+            trackAndLoadVisitorCount();
         };
     </script>
 </body>
