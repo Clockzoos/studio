@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - Entropy-Script</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Cropper.js CSS untuk fitur crop foto galeri -->
+    <!-- Cropper.js CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css"/>
     <style>
         .img-container {
@@ -77,7 +77,7 @@
             </div>
             <button type="button" class="btn-crop" id="cropBtn" onclick="performCrop()">Crop & Resize Image ✂️</button>
 
-            <!-- Preview Hasil Crop -->
+            <!-- Preview Hasil Crop (Hanya ini yang nanti akan tampil rapi) -->
             <img id="croppedPreview" alt="Cropped Preview">
 
             <div class="form-group">
@@ -110,6 +110,7 @@
                     sourceImage.src = event.target.result;
                     cropperArea.style.display = 'block';
                     cropBtn.style.display = 'block';
+                    croppedPreview.style.display = 'none'; // Sembunyikan preview lama jika ganti foto
 
                     if (cropper) {
                         cropper.destroy();
@@ -124,7 +125,7 @@
             }
         });
 
-        // Proses crop gambar agar tidak terlalu besar
+        // Proses crop gambar
         function performCrop() {
             if (cropper) {
                 let canvas = cropper.getCroppedCanvas({
@@ -132,11 +133,18 @@
                     height: 337
                 });
 
-                // Diubah ke format base64
                 finalImageUrl = canvas.toDataURL('image/jpeg', 0.8);
                 
+                // Tampilkan hasil preview yang rapi
                 croppedPreview.src = finalImageUrl;
                 croppedPreview.style.display = 'block';
+
+                // SEMBUNYIKAN KOTAK CROP ASLI & TOMBOLNYA AGAR TIDAK DOUBLE
+                cropperArea.style.display = 'none';
+                cropBtn.style.display = 'none';
+
+                // Hancurkan objek cropper agar memori bersih
+                cropper.destroy();
 
                 alert('Image cropped successfully!');
             }
@@ -158,15 +166,14 @@
             submitBtn.innerText = "Sending to Discord...";
             submitBtn.disabled = true;
 
-            // Format pesan Embed Discord
             const webhookURL = "https://discord.com/api/webhooks/1568556367369740369/SnjJPXyLeUjCKal5N_9V69PU_624k8ZmbO7dQE-ofmTql4puiKHOJuyP9uefKQngIJtp";
             
             const discordPayload = {
                 content: "🚨 **New Script Submission for Review!**",
                 embeds: [{
                     title: title,
-                    description: `**Script Link:** ${link}\n\n*(Review this script before publishing to the main website)*`,
-                    color: 16753920, // Warna kuning khas web kamu
+                    description: `**Script Link:** ${link}\n\n*(Review this script before publishing)*`,
+                    color: 16753920,
                     image: {
                         url: finalImageUrl
                     }
@@ -186,7 +193,7 @@
                     alert('Script successfully sent to your Discord channel for review!');
                     window.location.reload();
                 } else {
-                    alert('Failed to send to Discord. Check console for details.');
+                    alert('Failed to send to Discord.');
                     submitBtn.innerText = "Send to Discord for Review";
                     submitBtn.disabled = false;
                 }
