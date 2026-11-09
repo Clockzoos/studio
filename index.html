@@ -157,7 +157,7 @@
 
         let cropper;
         let finalImageUrl = "";
-        let allScriptsData = []; // Menyimpan data asli untuk keperluan search
+        let allScriptsData = [];
 
         async function loadPublicScripts() {
             let container = document.getElementById('publicScriptList');
@@ -189,7 +189,7 @@
                         <img src="${item.image}" alt="Thumb">
                         <div>
                             <h3 style="color: #fff; margin-bottom: 5px;">${item.title}</h3>
-                            <p style="color: #888; font-size: 13px; margin-bottom: 5px;">Hub/Creator: <span style="color: #ffbb00;">${item.hubName || "Anonymous"}</span></p>
+                            <p style="color: #888; font-size: 13px; margin-bottom: 5px;">Creators: <span style="color: #ffbb00;">${item.hubName || "Anonymous"}</span></p>
                             <a href="${item.link}" target="_blank" style="color: #38bdf8; font-size: 13px; text-decoration: none;">Get Script →</a>
                         </div>
                     </div>
