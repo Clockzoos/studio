@@ -10,12 +10,15 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f0f0f; color: #fff; margin: 0; padding: 20px; }
         header { text-align: center; margin-bottom: 30px; }
         
-        /* TOMBOL HEADER BERPASANGAN */
+        /* TOMBOL HEADER */
         .header-btns { display: flex; justify-content: center; gap: 12px; margin-top: 15px; flex-wrap: wrap; }
         .btn-upload-trigger { background: #ffbb00; color: #000; padding: 10px 20px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; display: inline-block; text-decoration: none; }
         .btn-upload-trigger:hover { background: #e0a800; }
-        .btn-pastebin-trigger { background: transparent; color: #ffbb00; border: 2px solid #ffbb00; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; display: inline-block; text-decoration: none; transition: 0.2s; }
-        .btn-pastebin-trigger:hover { background: rgba(255, 187, 0, 0.1); }
+
+        /* SEARCH BAR */
+        .search-container { max-width: 400px; margin: 20px auto 0 auto; }
+        .search-container input { width: 100%; padding: 10px 15px; background: #161616; color: #fff; border: 1px solid #333; border-radius: 8px; box-sizing: border-box; font-size: 14px; outline: none; }
+        .search-container input:focus { border-color: #ffbb00; }
 
         .container { max-width: 900px; margin: 0 auto; min-height: 60vh; padding-bottom: 50px; }
         .script-card { background: #161616; border: 1px solid #333; border-radius: 10px; padding: 15px; margin-bottom: 15px; display: flex; gap: 15px; align-items: center; }
@@ -68,19 +71,23 @@
 
     <header>
         <h1>ENTROPY SCRIPT HUB</h1>
-        <p>Explore verified scripts or upload your own community creations.</p>
+        <p>Explore studio lite scripts or upload your own script.</p>
         
-        <!-- TOMBOL BERPASANGAN DI HEADER -->
+        <!-- TOMBOL UPLOAD DI HEADER -->
         <div class="header-btns">
             <button class="btn-upload-trigger" onclick="openUploadModal()">+ Upload Script</button>
-            <a href="https://entropy-page.github.io/Pastebin/create.html" target="_blank" class="btn-pastebin-trigger">+ Create Pastebin</a>
+        </div>
+
+        <!-- SEARCH BAR -->
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search scripts or creators..." oninput="filterScripts()">
         </div>
     </header>
 
     <div class="container">
-        <h2>Live Scripts</h2>
+        <h2>All Posts</h2>
         <div id="publicScriptList">
-            <p style="color: #777;">Loading live scripts...</p>
+            <p style="color: #777;">Loading scripts...</p>
         </div>
     </div>
 
@@ -150,6 +157,7 @@
 
         let cropper;
         let finalImageUrl = "";
+        let allScriptsData = []; // Menyimpan data asli untuk keperluan search
 
         async function loadPublicScripts() {
             let container = document.getElementById('publicScriptList');
@@ -158,29 +166,45 @@
                     headers: { 'X-Master-Key': MASTER_KEY }
                 });
                 let data = await res.json();
-                let scripts = data.record || [];
+                allScriptsData = data.record || [];
 
-                container.innerHTML = "";
-                if (!Array.isArray(scripts) || scripts.length === 0) {
-                    container.innerHTML = `<p style="color: #777;">No public scripts available yet.</p>`;
-                    return;
-                }
-
-                scripts.forEach(item => {
-                    container.innerHTML += `
-                        <div class="script-card">
-                            <img src="${item.image}" alt="Thumb">
-                            <div>
-                                <h3 style="color: #fff; margin-bottom: 5px;">${item.title}</h3>
-                                <p style="color: #888; font-size: 13px; margin-bottom: 5px;">Hub/Creator: <span style="color: #ffbb00;">${item.hubName || "Anonymous"}</span></p>
-                                <a href="${item.link}" target="_blank" style="color: #38bdf8; font-size: 13px; text-decoration: none;">Get Script →</a>
-                            </div>
-                        </div>
-                    `;
-                });
+                renderScripts(allScriptsData);
             } catch (err) {
                 container.innerHTML = `<p style="color: #ff5555;">Failed to load scripts.</p>`;
             }
+        }
+
+        function renderScripts(scripts) {
+            let container = document.getElementById('publicScriptList');
+            container.innerHTML = "";
+
+            if (!Array.isArray(scripts) || scripts.length === 0) {
+                container.innerHTML = `<p style="color: #777;">No scripts available.</p>`;
+                return;
+            }
+
+            scripts.forEach(item => {
+                container.innerHTML += `
+                    <div class="script-card">
+                        <img src="${item.image}" alt="Thumb">
+                        <div>
+                            <h3 style="color: #fff; margin-bottom: 5px;">${item.title}</h3>
+                            <p style="color: #888; font-size: 13px; margin-bottom: 5px;">Hub/Creator: <span style="color: #ffbb00;">${item.hubName || "Anonymous"}</span></p>
+                            <a href="${item.link}" target="_blank" style="color: #38bdf8; font-size: 13px; text-decoration: none;">Get Script →</a>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function filterScripts() {
+            let keyword = document.getElementById('searchInput').value.toLowerCase();
+            let filtered = allScriptsData.filter(item => {
+                let titleMatch = item.title && item.title.toLowerCase().includes(keyword);
+                let hubMatch = item.hubName && item.hubName.toLowerCase().includes(keyword);
+                return titleMatch || hubMatch;
+            });
+            renderScripts(filtered);
         }
 
         async function trackAndLoadVisitorCount() {
