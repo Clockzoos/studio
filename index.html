@@ -33,12 +33,26 @@
         .form-group { margin-bottom: 12px; text-align: left; }
         .form-group label { display: block; margin-bottom: 5px; font-size: 14px; color: #ccc; }
         .form-group input { width: 100%; padding: 10px; background: #0f0f0f; color: #fff; border: 1px solid #333; border-radius: 6px; box-sizing: border-box; }
+        
+        /* CUSTOM FILE INPUT STYLING */
+        .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; }
+        .file-input-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
+        .btn-file-custom { border: 1px solid #333; color: #ccc; background: #0f0f0f; padding: 10px; border-radius: 6px; display: block; text-align: center; cursor: pointer; font-size: 14px; }
+        .btn-file-custom:hover { border-color: #ffbb00; color: #ffbb00; }
+
         .img-container { max-width: 100%; max-height: 250px; margin-bottom: 15px; display: none; }
         .img-container img { max-width: 100%; display: block; }
         .btn-crop { background-color: #222; color: #ffbb00; border: 1px solid #ffbb00; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 15px; display: none; width: 100%; }
         #croppedPreview { width: 100%; height: 120px; object-fit: cover; border-radius: 6px; margin-bottom: 15px; display: none; border: 1px dashed #ffbb00; }
         .cooldown-info { font-size: 12px; color: #f59e0b; margin-top: 5px; }
         
+        /* CUSTOM TOAST / ALERT MODAL */
+        #customAlertModal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; }
+        .custom-alert-box { background: #161616; border: 1px solid #333; padding: 25px; border-radius: 12px; width: 85%; max-width: 350px; text-align: center; box-shadow: 0 8px 24px rgba(0,0,0,0.6); }
+        .custom-alert-msg { color: #fff; font-size: 15px; margin-bottom: 20px; line-height: 1.4; }
+        .custom-alert-btn { background: #ffbb00; color: #000; border: none; padding: 10px 25px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 14px; width: 100%; }
+        .custom-alert-btn:hover { background: #e0a800; }
+
         /* FLOATING VISITOR COUNTER DI POJOK KANAN BAWAH */
         .floating-counter {
             position: fixed;
@@ -91,6 +105,14 @@
         </div>
     </div>
 
+    <!-- CUSTOM ALERT MODAL -->
+    <div id="customAlertModal">
+        <div class="custom-alert-box">
+            <div id="customAlertMessage" class="custom-alert-msg">Notification message here</div>
+            <button class="custom-alert-btn" onclick="closeCustomAlert()">OK</button>
+        </div>
+    </div>
+
     <!-- FLOATING VISITOR COUNTER -->
     <div class="floating-counter">
         Views: <span id="visitorCount">Loading...</span>
@@ -117,8 +139,8 @@
             
             <form id="publicUploadForm" onsubmit="submitPublicScript(event)">
                 <div class="form-group">
-                    <label>Hub / Creator Name:</label>
-                    <input type="text" id="hubName" placeholder="e.g. Entropy Hub" required>
+                    <label>Creator Name:</label>
+                    <input type="text" id="hubName" placeholder="e.g. Entropy" required>
                     <div id="cooldownText" class="cooldown-info"></div>
                 </div>
 
@@ -129,7 +151,10 @@
 
                 <div class="form-group">
                     <label>Thumbnail Image:</label>
-                    <input type="file" id="imageInput" accept="image/*">
+                    <div class="file-input-wrapper">
+                        <div class="btn-file-custom" id="fileLabelText">Choose Image File</div>
+                        <input type="file" id="imageInput" accept="image/*" onchange="updateFileName(this)">
+                    </div>
                 </div>
 
                 <div class="img-container" id="cropperArea">
@@ -158,6 +183,21 @@
         let cropper;
         let finalImageUrl = "";
         let allScriptsData = [];
+        let alertCallback = null;
+
+        function showCustomAlert(message, callback = null) {
+            document.getElementById('customAlertMessage').innerText = message;
+            document.getElementById('customAlertModal').style.display = 'flex';
+            alertCallback = callback;
+        }
+
+        function closeCustomAlert() {
+            document.getElementById('customAlertModal').style.display = 'none';
+            if (typeof alertCallback === 'function') {
+                alertCallback();
+                alertCallback = null;
+            }
+        }
 
         async function loadPublicScripts() {
             let container = document.getElementById('publicScriptList');
@@ -275,10 +315,19 @@
                 let timeLeft = cooldownTime - (now - lastChange);
                 let daysLeft = Math.ceil(timeLeft / (1000 * 60 * 60 * 24));
                 hubInput.disabled = true;
-                cooldownText.innerText = `🔒 Hub name is locked. You can change it again in ${daysLeft} day(s).`;
+                cooldownText.innerText = `🔒 Creator name is locked. You can change it again in ${daysLeft} day(s).`;
             } else {
                 hubInput.disabled = false;
-                cooldownText.innerText = `✨ You can set or update your Hub name freely. Once changed, it will lock for 7 days.`;
+                cooldownText.innerText = `✨ You can set or update your Creator name freely. Once changed, it will lock for 7 days.`;
+            }
+        }
+
+        function updateFileName(input) {
+            let labelText = document.getElementById('fileLabelText');
+            if (input.files && input.files.length > 0) {
+                labelText.innerText = "File selected: " + input.files[0].name;
+            } else {
+                labelText.innerText = "Choose Image File";
             }
         }
 
@@ -316,7 +365,7 @@
                 cropperArea.style.display = 'none';
                 cropBtn.style.display = 'none';
                 cropper.destroy();
-                alert('Image successfully cropped!');
+                showCustomAlert('Image successfully cropped!');
             }
         }
 
@@ -328,7 +377,7 @@
             let submitBtn = document.getElementById('submitBtn');
 
             if (!finalImageUrl) {
-                alert('Please select and crop a thumbnail image first!');
+                showCustomAlert('Please select and crop a thumbnail image first!');
                 return;
             }
 
@@ -340,7 +389,7 @@
             if (savedHub && savedHub !== hubName && (now - lastChange < cooldownTime)) {
                 let timeLeft = cooldownTime - (now - lastChange);
                 let daysLeft = Math.ceil(timeLeft / (1000 * 60 * 60 * 24));
-                alert(`Error: You cannot change your Hub name yet. Cooldown is active for another ${daysLeft} day(s).`);
+                showCustomAlert(`Error: You cannot change your Creator name yet. Cooldown is active for another ${daysLeft} day(s).`);
                 return;
             }
 
@@ -369,17 +418,18 @@
                 });
 
                 if (putRes.ok) {
-                    alert('Script successfully submitted to the review queue!');
-                    closeUploadModal();
-                    location.reload();
+                    showCustomAlert('Script successfully submitted to the review queue!', () => {
+                        closeUploadModal();
+                        location.reload();
+                    });
                 } else {
-                    alert('Failed to submit script.');
+                    showCustomAlert('Failed to submit script.');
                     submitBtn.innerText = "Submit to Queue 📥";
                     submitBtn.disabled = false;
                 }
             } catch (err) {
                 console.error(err);
-                alert('Connection error.');
+                showCustomAlert('Connection error.');
                 submitBtn.innerText = "Submit to Queue 📥";
                 submitBtn.disabled = false;
             }
