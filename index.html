@@ -1,4 +1,4 @@
-html_code = '''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -392,18 +392,22 @@ html_code = '''<!DOCTYPE html>
         function handleCategoryChange() {
             let cat = document.getElementById('categoryType').value;
             let linkLabel = document.getElementById('linkFieldLabel');
+            let linkInput = document.getElementById('scriptLink');
 
             selectedTags = [];
 
             if (cat === 'script') {
                 selectedTags.push('script');
                 linkLabel.innerText = "Script Link:";
+                linkInput.placeholder = "https://pastebin.com/raw/...";
             } else if (cat === 'toolbox_id') {
                 selectedTags.push('toolbox');
                 linkLabel.innerText = "Toolbox ID:";
+                linkInput.placeholder = "Enter ID Toolbox...";
             } else if (cat === 'game_copying') {
                 selectedTags.push('uncopylocked');
                 linkLabel.innerText = "Games ID:";
+                linkInput.placeholder = "Enter Place ID...";
             }
 
             renderTags();
@@ -607,8 +611,3 @@ html_code = '''<!DOCTYPE html>
     </script>
 </body>
 </html>
-'''
-
-with open("index.html", "w", encoding="utf-8") as f:
-    f.write(html_code)
-
