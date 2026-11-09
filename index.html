@@ -1,10 +1,9 @@
-<!DOCTYPE html>
+html_code = '''<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Entropy-Script Hub</title>
-    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css"/>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f0f0f; color: #fff; margin: 0; padding: 20px; }
@@ -186,7 +185,7 @@
                     <label>Category Type:</label>
                     <select id="categoryType" onchange="handleCategoryChange()" required>
                         <option value="script">Script</option>
-                        <option value="id">ID</option>
+                        <option value="toolbox_id">ToolBox ID</option>
                         <option value="game_copying">Game Copying</option>
                     </select>
                 </div>
@@ -215,7 +214,7 @@
                 <img id="croppedPreview" alt="Cropped Preview">
 
                 <div class="form-group">
-                    <label>Script Link:</label>
+                    <label id="linkFieldLabel">Script Link:</label>
                     <input type="text" id="scriptLink" placeholder="https://pastebin.com/raw/..." required>
                 </div>
 
@@ -294,7 +293,7 @@
                             <p style="color: #888; font-size: 13px; margin-bottom: 3px;">Creators: <span style="color: #ffbb00;">${item.hubName || "Anonymous"}</span></p>
                             <div>${tagsHtml}</div>
                             <div style="margin-top: 5px;">
-                                <a href="${item.link}" target="_blank" style="color: #38bdf8; font-size: 13px; text-decoration: none;">Get Script →</a>
+                                <a href="${item.link}" target="_blank" style="color: #38bdf8; font-size: 13px; text-decoration: none;">Get Link →</a>
                             </div>
                         </div>
                     </div>
@@ -392,14 +391,21 @@
 
         function handleCategoryChange() {
             let cat = document.getElementById('categoryType').value;
+            let linkLabel = document.getElementById('linkFieldLabel');
+
             selectedTags = [];
+
             if (cat === 'script') {
                 selectedTags.push('script');
+                linkLabel.innerText = "Script Link:";
+            } else if (cat === 'toolbox_id') {
+                selectedTags.push('toolbox');
+                linkLabel.innerText = "Toolbox ID:";
             } else if (cat === 'game_copying') {
                 selectedTags.push('uncopylocked');
-            } else if (cat === 'id') {
-                selectedTags.push('id');
+                linkLabel.innerText = "Games ID:";
             }
+
             renderTags();
         }
 
@@ -438,7 +444,7 @@
             selectedTags.splice(index, 1);
             
             if (cat === 'script' && !selectedTags.includes('script')) selectedTags.unshift('script');
-            if (cat === 'id' && !selectedTags.includes('id')) selectedTags.unshift('id');
+            if (cat === 'toolbox_id' && !selectedTags.includes('toolbox')) selectedTags.unshift('toolbox');
             if (cat === 'game_copying' && !selectedTags.includes('uncopylocked')) selectedTags.unshift('uncopylocked');
 
             renderTags();
@@ -522,15 +528,15 @@
             }
 
             let hasScript = selectedTags.includes('script');
-            let hasId = selectedTags.includes('id');
+            let hasToolbox = selectedTags.includes('toolbox');
             let hasUncopy = selectedTags.includes('uncopylocked');
 
             if (category === 'script' && !hasScript) {
                 showCustomAlert('Error: The "Script" category requires the tag "script".');
                 return;
             }
-            if (category === 'id' && !hasId) {
-                showCustomAlert('Error: The "ID" category requires the tag "id".');
+            if (category === 'toolbox_id' && !hasToolbox) {
+                showCustomAlert('Error: The "ToolBox ID" category requires the tag "toolbox".');
                 return;
             }
             if (category === 'game_copying' && !hasUncopy) {
@@ -552,7 +558,7 @@
 
             if (savedHub !== hubName) {
                 localStorage.setItem('user_hub_name', hubName);
-                localStorage.setItem('hub_last_change_time', posts.toString()); // safe fallback
+                localStorage.setItem('hub_last_change_time', now.toString());
             }
 
             submitBtn.innerText = "Uploading...";
@@ -601,3 +607,8 @@
     </script>
 </body>
 </html>
+'''
+
+with open("index.html", "w", encoding="utf-8") as f:
+    f.write(html_code)
+
