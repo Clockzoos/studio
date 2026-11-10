@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Entropy - Admin Panel</title>
+    <title>Entropy - Secure Admin Panel</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f0f0f; color: #fff; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 90vh; }
         .admin-card { display: none; background: #161616; border: 1px solid #333; border-radius: 12px; padding: 30px; width: 100%; max-width: 500px; box-sizing: border-box; box-shadow: 0 8px 24px rgba(0,0,0,0.8); }
@@ -13,7 +13,7 @@
         .form-group label { display: block; margin-bottom: 6px; font-size: 14px; color: #ccc; }
         .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; background: #0f0f0f; color: #fff; border: 1px solid #333; border-radius: 6px; box-sizing: border-box; font-size: 14px; outline: none; }
         .form-group select option { background: #0f0f0f; color: #fff; }
-        .form-group textarea { resize: vertical; min-height: 150px; font-family: monospace; }
+        .form-group textarea { resize: vertical; min-height: 140px; font-family: monospace; }
         
         .tag-input-wrapper { display: flex; gap: 8px; align-items: center; }
         .tag-input-wrapper input { flex-grow: 1; }
@@ -26,8 +26,16 @@
         
         .btn-submit { width: 100%; background: #28a745; color: white; padding: 12px; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; font-size: 15px; }
         .btn-submit:hover { background: #218838; }
+        
+        .btn-settings { width: 100%; background: #333; color: #ffbb00; border: 1px solid #ffbb00; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 14px; }
+        .btn-settings:hover { background: #444; }
+
         .btn-back { display: block; text-align: center; margin-top: 15px; color: #aaa; text-decoration: none; font-size: 13px; }
         .btn-back:hover { color: #fff; }
+
+        /* MODAL UMUM */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
+        .modal-content { background: #161616; padding: 30px; border-radius: 12px; width: 90%; max-width: 400px; border: 1px solid #333; color: #fff; text-align: center; box-sizing: border-box; }
 
         /* CUSTOM ALERT MODAL */
         #customAlertModal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; }
@@ -44,8 +52,8 @@
 
         <form onsubmit="submitAdminScript(event)">
             <div class="form-group">
-                <label>Custom ID Postingan (Contoh: 39625):</label>
-                <input type="text" id="customScriptId" placeholder="Bebas, misal: 39625" required>
+                <label>Custom Post ID (e.g. 39625):</label>
+                <input type="text" id="customScriptId" placeholder="e.g. 39625" required>
             </div>
 
             <div class="form-group">
@@ -84,7 +92,21 @@
             <button type="submit" id="submitBtn" class="btn-submit">Publish Post 🚀</button>
         </form>
 
+        <button class="btn-settings" onclick="openPasswordModal()">⚙️ Change Admin Password</button>
         <a href="./" class="btn-back">← Back to Main Hub</a>
+    </div>
+
+    <!-- PASSWORD SETTINGS MODAL -->
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <h3 style="color: #ffbb00; margin-top: 0;">Change Admin Password</h3>
+            <div class="form-group">
+                <label>New Password:</label>
+                <input type="password" id="newAdminPasswordInput" placeholder="Enter new password">
+            </div>
+            <button class="btn-submit" onclick="saveNewPassword()">Save Password</button>
+            <button class="btn-settings" onclick="closePasswordModal()" style="margin-top: 10px;">Cancel</button>
+        </div>
     </div>
 
     <!-- CUSTOM ALERT MODAL -->
@@ -96,20 +118,23 @@
     </div>
 
     <script>
-        // --- UBAH PASSWORD ADMIN ANDA DI SINI ---
-        const ADMIN_PASSWORD = "nafyari_rahasia"; 
+        // Default admin password if not set yet
+        function getAdminPassword() {
+            return localStorage.getItem("entropy_admin_pw") || "nafyari_rahasia";
+        }
 
         window.onload = function() {
             let isVerified = localStorage.getItem("entropy_admin_logged");
+            let correctPw = getAdminPassword();
 
             if (!isVerified) {
-                let pass = prompt("Verifikasi Perangkat Admin. Masukkan Password:");
-                if (pass === ADMIN_PASSWORD) {
+                let pass = prompt("Admin Device Verification. Enter Password:");
+                if (pass === correctPw) {
                     localStorage.setItem("entropy_admin_logged", "true");
                     document.getElementById('adminContainer').style.display = 'block';
                     handleCategoryChange();
                 } else {
-                    alert("Password Salah! Perangkat tidak dikenali.");
+                    alert("Incorrect Password! Access denied. Redirecting...");
                     window.location.href = "./";
                 }
             } else {
@@ -117,6 +142,25 @@
                 handleCategoryChange();
             }
         };
+
+        function openPasswordModal() {
+            document.getElementById('passwordModal').style.display = 'flex';
+        }
+
+        function closePasswordModal() {
+            document.getElementById('passwordModal').style.display = 'none';
+        }
+
+        function saveNewPassword() {
+            let newPw = document.getElementById('newAdminPasswordInput'].value.trim();
+            if (!newPw) {
+                showCustomAlert("Password cannot be empty!");
+                return;
+            }
+            localStorage.setItem("entropy_admin_pw", newPw);
+            closePasswordModal();
+            showCustomAlert("Admin password successfully updated!");
+        }
 
         const PUBLIC_BIN_ID = "6aef05abac6210605a74f72a";
         const MASTER_KEY = "$2a$10$7kUozSyzkNytbUxnN7/kv.xInV14ItUgvNAWdjKEswZ0M.DDWgL/e";
@@ -167,14 +211,14 @@
             let input = document.getElementById('tagInputBox');
             let val = input.value.trim().toLowerCase();
             if (!val) return;
-            if (selectedTags.length >= 6) { showCustomAlert('Maksimal 6 tag.'); return; }
+            if (selectedTags.length >= 6) { showCustomAlert('Maximum 6 tags allowed.'); return; }
             if (!selectedTags.includes(val)) {
                 selectedTags.push(val);
                 input.value = "";
                 document.getElementById('addTagBtn').style.display = 'none';
                 renderTags();
             } else {
-                showCustomAlert('Tag sudah ada.');
+                showCustomAlert('Tag already added.');
             }
         }
 
@@ -205,7 +249,7 @@
             let submitBtn = document.getElementById('submitBtn');
 
             if (selectedTags.length < 3 || selectedTags.length > 6) {
-                showCustomAlert('Harap masukkan 3 sampai 6 tag.');
+                showCustomAlert('Please ensure you have between 3 and 6 tags added.');
                 return;
             }
 
@@ -222,7 +266,7 @@
 
                 let exists = scripts.find(item => item.id === customId);
                 if (exists) {
-                    showCustomAlert('Error: ID "' + customId + '" sudah dipakai! Gunakan angka lain.');
+                    showCustomAlert('Error: ID "' + customId + '" is already taken! Use another ID.');
                     submitBtn.innerText = "Publish Post 🚀";
                     submitBtn.disabled = false;
                     return;
@@ -245,17 +289,17 @@
                 });
 
                 if (putRes.ok) {
-                    showCustomAlert('Berhasil! Postingan terbit dengan ID #' + customId, () => {
+                    showCustomAlert('Success! Post published with ID #' + customId, () => {
                         window.location.href = "./#" + customId;
                     });
                 } else {
-                    showCustomAlert('Gagal menyimpan ke server.');
+                    showCustomAlert('Failed to save to server.');
                     submitBtn.innerText = "Publish Post 🚀";
                     submitBtn.disabled = false;
                 }
             } catch (err) {
                 console.error(err);
-                showCustomAlert('Terjadi kesalahan koneksi.');
+                showCustomAlert('Connection error.');
                 submitBtn.innerText = "Publish Post 🚀";
                 submitBtn.disabled = false;
             }
