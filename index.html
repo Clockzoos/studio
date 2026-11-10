@@ -35,7 +35,7 @@
         /* TAG BADGE STYLING */
         .tag-badge { background: rgba(255, 187, 0, 0.15); color: #ffbb00; border: 1px solid #ffbb00; font-size: 11px; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-top: 4px; margin-right: 5px; font-weight: bold; }
         
-        /* TOMBOL AKSI DI CARD (GET SCRIPT / COPY ID) */
+        /* TOMBOL AKSI DI CARD */
         .btn-action-link { background: #38bdf8; color: #000; font-size: 12px; font-weight: bold; padding: 6px 12px; border-radius: 6px; text-decoration: none; display: inline-block; border: none; cursor: pointer; }
         .btn-action-link:hover { background: #0ea5e9; }
         
@@ -179,13 +179,13 @@
             <form id="publicUploadForm" onsubmit="submitPublicScript(event)">
                 <div class="form-group">
                     <label>Creator Name:</label>
-                    <input type="text" id="hubName" placeholder="e.g. Entropy" required>
+                    <input type="text" id="hubName" placeholder="e.g. nafyari" required>
                     <div id="cooldownText" class="cooldown-info"></div>
                 </div>
 
                 <div class="form-group">
                     <label>Script Title:</label>
-                    <input type="text" id="scriptTitle" placeholder="e.g title script" required>
+                    <input type="text" id="scriptTitle" placeholder="e.g. Title Owner" required>
                 </div>
 
                 <div class="form-group">
@@ -207,9 +207,9 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Thumbnail Image:</label>
+                    <label>Thumbnail Image (Optional):</label>
                     <div class="file-input-wrapper">
-                        <div class="btn-file-custom" id="fileLabelText">Choose Image File</div>
+                        <div class="btn-file-custom" id="fileLabelText">Choose Image File (Opsional)</div>
                         <input type="file" id="imageInput" accept="image/*" onchange="updateFileName(this)">
                     </div>
                 </div>
@@ -235,6 +235,8 @@
         const PUBLIC_BIN_ID = "6aef05abac6210605a74f72a";
         const VISITOR_BIN_ID = "6aef6a34ac6210605a75da3f"; 
         const MASTER_KEY = "$2a$10$7kUozSyzkNytbUxnN7/kv.xInV14ItUgvNAWdjKEswZ0M.DDWgL/e";
+        
+        const DEFAULT_AUTO_IMAGE = "https://tr.rbxcdn.com/180DAY-2944a7f2090621fd07d89499ea40fa46/500/280/Image/Jpeg/noFilter";
 
         let cropper;
         let finalImageUrl = "";
@@ -303,9 +305,11 @@
                     actionBtnHtml = `<a href="${item.link}" target="_blank" class="btn-action-link">Get Script →</a>`;
                 }
 
+                let imgSource = item.image || DEFAULT_AUTO_IMAGE;
+
                 container.innerHTML += `
                     <div class="script-card">
-                        <img src="${item.image}" alt="Thumb">
+                        <img src="${imgSource}" alt="Thumb">
                         <div style="flex-grow: 1;">
                             <h3 style="color: #fff; margin-bottom: 5px;">${item.title}</h3>
                             <p style="color: #888; font-size: 13px; margin-bottom: 3px;">Creators: <span style="color: #ffbb00;">${item.hubName || "Anonymous"}</span></p>
@@ -501,7 +505,7 @@
             if (input.files && input.files.length > 0) {
                 labelText.innerText = "File selected: " + input.files[0].name;
             } else {
-                labelText.innerText = "Choose Image File";
+                labelText.innerText = "Choose Image File (Opsional)";
             }
         }
 
@@ -550,11 +554,6 @@
             let category = document.getElementById('categoryType').value;
             let link = document.getElementById('scriptLink').value.trim();
             let submitBtn = document.getElementById('submitBtn');
-
-            if (!finalImageUrl) {
-                showCustomAlert('Please select and crop a thumbnail image first!');
-                return;
-            }
 
             if (selectedTags.length < 3 || selectedTags.length > 6) {
                 showCustomAlert('Please ensure you have between 3 and 6 tags added.');
@@ -608,7 +607,10 @@
 
                 let tagsString = selectedTags.join(',');
 
-                scripts.unshift({ hubName, title, category, tags: tagsString, image: finalImageUrl, link });
+                // Jika user meng-crop gambar sendiri, pakai gambar itu. Jika tidak, pakai gambar default otomatis.
+                let imageToSave = finalImageUrl ? finalImageUrl : DEFAULT_AUTO_IMAGE;
+
+                scripts.unshift({ hubName, title, category, tags: tagsString, image: imageToSave, link });
 
                 let putRes = await fetch(`https://api.jsonbin.io/v3/b/${PUBLIC_BIN_ID}`, {
                     method: 'PUT',
