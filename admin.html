@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entropy - Admin Panel</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f0f0f; color: #fff; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 90vh; }
+        .admin-card { display: none; background: #161616; border: 1px solid #333; border-radius: 12px; padding: 30px; width: 100%; max-width: 500px; box-sizing: border-box; box-shadow: 0 8px 24px rgba(0,0,0,0.8); }
+        h2 { color: #ffbb00; text-align: center; margin-bottom: 5px; }
+        p.subtitle { text-align: center; color: #888; font-size: 13px; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 6px; font-size: 14px; color: #ccc; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; background: #0f0f0f; color: #fff; border: 1px solid #333; border-radius: 6px; box-sizing: border-box; font-size: 14px; outline: none; }
+        .form-group select option { background: #0f0f0f; color: #fff; }
+        .form-group textarea { resize: vertical; min-height: 150px; font-family: monospace; }
+        
+        .tag-input-wrapper { display: flex; gap: 8px; align-items: center; }
+        .tag-input-wrapper input { flex-grow: 1; }
+        .btn-add-tag { background: #222; color: #ffbb00; border: 1px solid #ffbb00; padding: 10px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; display: none; white-space: nowrap; }
+        .btn-add-tag:hover { background: #333; }
+
+        .added-tags-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+        .selected-tag-chip { background: rgba(255, 187, 0, 0.2); color: #ffbb00; border: 1px solid #ffbb00; padding: 4px 10px; border-radius: 20px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; font-weight: bold; }
+        .selected-tag-chip span { cursor: pointer; color: #ff5555; font-weight: bold; font-size: 14px; }
+        
+        .btn-submit { width: 100%; background: #28a745; color: white; padding: 12px; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; font-size: 15px; }
+        .btn-submit:hover { background: #218838; }
+        .btn-back { display: block; text-align: center; margin-top: 15px; color: #aaa; text-decoration: none; font-size: 13px; }
+        .btn-back:hover { color: #fff; }
+
+        /* CUSTOM ALERT MODAL */
+        #customAlertModal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; }
+        .custom-alert-box { background: #161616; border: 1px solid #333; padding: 25px; border-radius: 12px; width: 85%; max-width: 350px; text-align: center; }
+        .custom-alert-msg { color: #fff; font-size: 15px; margin-bottom: 20px; line-height: 1.4; }
+        .custom-alert-btn { background: #ffbb00; color: #000; border: none; padding: 10px 25px; font-weight: bold; border-radius: 6px; cursor: pointer; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <div class="admin-card" id="adminContainer">
+        <h2>ENTROPY ADMIN</h2>
+        <p class="subtitle">Publish scripts & control custom IDs</p>
+
+        <form onsubmit="submitAdminScript(event)">
+            <div class="form-group">
+                <label>Custom ID Postingan (Contoh: 39625):</label>
+                <input type="text" id="customScriptId" placeholder="Bebas, misal: 39625" required>
+            </div>
+
+            <div class="form-group">
+                <label>Creator Name:</label>
+                <input type="text" id="hubName" value="Nafyari" required>
+            </div>
+
+            <div class="form-group">
+                <label>Script Title:</label>
+                <input type="text" id="scriptTitle" placeholder="e.g. Title Owner" required>
+            </div>
+
+            <div class="form-group">
+                <label>Category Type:</label>
+                <select id="categoryType" onchange="handleCategoryChange()" required>
+                    <option value="script">Script</option>
+                    <option value="toolbox_id">ToolBox ID</option>
+                    <option value="game_copying">Game Copying</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Tags (3-6 Tags):</label>
+                <div class="tag-input-wrapper">
+                    <input type="text" id="tagInputBox" placeholder="Type a tag..." oninput="checkTagInput()">
+                    <button type="button" class="btn-add-tag" id="addTagBtn" onclick="addTagFromInput()">Add</button>
+                </div>
+                <div id="addedTagsList" class="added-tags-container"></div>
+            </div>
+
+            <div class="form-group">
+                <label id="linkFieldLabel">Script / Code Content:</label>
+                <textarea id="scriptContentInput" placeholder="Paste Lua script here..." required style="white-space: pre;"></textarea>
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn-submit">Publish Post 🚀</button>
+        </form>
+
+        <a href="./" class="btn-back">← Back to Main Hub</a>
+    </div>
+
+    <!-- CUSTOM ALERT MODAL -->
+    <div id="customAlertModal">
+        <div class="custom-alert-box">
+            <div id="customAlertMessage" class="custom-alert-msg">Message</div>
+            <button class="custom-alert-btn" onclick="closeCustomAlert()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        // --- UBAH PASSWORD ADMIN ANDA DI SINI ---
+        const ADMIN_PASSWORD = "nafyari_rahasia"; 
+
+        window.onload = function() {
+            let isVerified = localStorage.getItem("entropy_admin_logged");
+
+            if (!isVerified) {
+                let pass = prompt("Verifikasi Perangkat Admin. Masukkan Password:");
+                if (pass === ADMIN_PASSWORD) {
+                    localStorage.setItem("entropy_admin_logged", "true");
+                    document.getElementById('adminContainer').style.display = 'block';
+                    handleCategoryChange();
+                } else {
+                    alert("Password Salah! Perangkat tidak dikenali.");
+                    window.location.href = "./";
+                }
+            } else {
+                document.getElementById('adminContainer').style.display = 'block';
+                handleCategoryChange();
+            }
+        };
+
+        const PUBLIC_BIN_ID = "6aef05abac6210605a74f72a";
+        const MASTER_KEY = "$2a$10$7kUozSyzkNytbUxnN7/kv.xInV14ItUgvNAWdjKEswZ0M.DDWgL/e";
+        const DEFAULT_AUTO_IMAGE = "https://tr.rbxcdn.com/180DAY-2944a7f2090621fd07d89499ea40fa46/500/280/Image/Jpeg/noFilter";
+
+        let selectedTags = [];
+        let alertCallback = null;
+
+        function showCustomAlert(msg, cb = null) {
+            document.getElementById('customAlertMessage').innerText = msg;
+            document.getElementById('customAlertModal').style.display = 'flex';
+            alertCallback = cb;
+        }
+
+        function closeCustomAlert() {
+            document.getElementById('customAlertModal').style.display = 'none';
+            if (typeof alertCallback === 'function') alertCallback();
+        }
+
+        function handleCategoryChange() {
+            let cat = document.getElementById('categoryType').value;
+            let linkLabel = document.getElementById('linkFieldLabel');
+            let linkInput = document.getElementById('scriptContentInput');
+            selectedTags = [];
+
+            if (cat === 'script') {
+                selectedTags.push('script');
+                linkLabel.innerText = "Script / Code Content:";
+                linkInput.placeholder = "Paste your Lua script here directly...";
+            } else if (cat === 'toolbox_id') {
+                selectedTags.push('toolbox');
+                linkLabel.innerText = "Toolbox ID:";
+                linkInput.placeholder = "Enter ID Toolbox...";
+            } else if (cat === 'game_copying') {
+                selectedTags.push('uncopylocked');
+                linkLabel.innerText = "Games ID:";
+                linkInput.placeholder = "Enter Place ID...";
+            }
+            renderTags();
+        }
+
+        function checkTagInput() {
+            let val = document.getElementById('tagInputBox').value.trim();
+            document.getElementById('addTagBtn').style.display = val.length > 0 ? 'inline-block' : 'none';
+        }
+
+        function addTagFromInput() {
+            let input = document.getElementById('tagInputBox');
+            let val = input.value.trim().toLowerCase();
+            if (!val) return;
+            if (selectedTags.length >= 6) { showCustomAlert('Maksimal 6 tag.'); return; }
+            if (!selectedTags.includes(val)) {
+                selectedTags.push(val);
+                input.value = "";
+                document.getElementById('addTagBtn').style.display = 'none';
+                renderTags();
+            } else {
+                showCustomAlert('Tag sudah ada.');
+            }
+        }
+
+        function removeTag(index) {
+            let cat = document.getElementById('categoryType').value;
+            selectedTags.splice(index, 1);
+            if (cat === 'script' && !selectedTags.includes('script')) selectedTags.unshift('script');
+            if (cat === 'toolbox_id' && !selectedTags.includes('toolbox')) selectedTags.unshift('toolbox');
+            if (cat === 'game_copying' && !selectedTags.includes('uncopylocked')) selectedTags.unshift('uncopylocked');
+            renderTags();
+        }
+
+        function renderTags() {
+            let container = document.getElementById('addedTagsList');
+            container.innerHTML = "";
+            selectedTags.forEach((tag, idx) => {
+                container.innerHTML += `<div class="selected-tag-chip">#${tag} <span onclick="removeTag(${idx})">&times;</span></div>`;
+            });
+        }
+
+        async function submitAdminScript(event) {
+            event.preventDefault();
+            let customId = document.getElementById('customScriptId').value.trim();
+            let hubName = document.getElementById('hubName').value.trim();
+            let title = document.getElementById('scriptTitle').value.trim();
+            let category = document.getElementById('categoryType').value;
+            let link = document.getElementById('scriptContentInput').value;
+            let submitBtn = document.getElementById('submitBtn');
+
+            if (selectedTags.length < 3 || selectedTags.length > 6) {
+                showCustomAlert('Harap masukkan 3 sampai 6 tag.');
+                return;
+            }
+
+            submitBtn.innerText = "Publishing...";
+            submitBtn.disabled = true;
+
+            try {
+                let res = await fetch(`https://api.jsonbin.io/v3/b/${PUBLIC_BIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': MASTER_KEY }
+                });
+                let data = await res.json();
+                let scripts = data.record || [];
+                if (!Array.isArray(scripts)) scripts = [];
+
+                let exists = scripts.find(item => item.id === customId);
+                if (exists) {
+                    showCustomAlert('Error: ID "' + customId + '" sudah dipakai! Gunakan angka lain.');
+                    submitBtn.innerText = "Publish Post 🚀";
+                    submitBtn.disabled = false;
+                    return;
+                }
+
+                scripts.unshift({
+                    id: customId,
+                    hubName,
+                    title,
+                    category,
+                    tags: selectedTags.join(','),
+                    image: DEFAULT_AUTO_IMAGE,
+                    link
+                });
+
+                let putRes = await fetch(`https://api.jsonbin.io/v3/b/${PUBLIC_BIN_ID}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': MASTER_KEY },
+                    body: JSON.stringify(scripts)
+                });
+
+                if (putRes.ok) {
+                    showCustomAlert('Berhasil! Postingan terbit dengan ID #' + customId, () => {
+                        window.location.href = "./#" + customId;
+                    });
+                } else {
+                    showCustomAlert('Gagal menyimpan ke server.');
+                    submitBtn.innerText = "Publish Post 🚀";
+                    submitBtn.disabled = false;
+                }
+            } catch (err) {
+                console.error(err);
+                showCustomAlert('Terjadi kesalahan koneksi.');
+                submitBtn.innerText = "Publish Post 🚀";
+                submitBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
