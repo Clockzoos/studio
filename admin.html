@@ -24,7 +24,7 @@
         
         .btn-submit { width: 100%; background: #28a745; color: white; padding: 12px; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; font-size: 15px; }
         .btn-submit:hover { background: #218838; }
-        .btn-settings { width: 100%; background: #333; color: #ffbb00; border: 1px solid #ffbb00; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 14px; }
+        .btn-settings { width: 100%; background: #333; color: #ffbb00; border: 1px solid #ffbb00; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 14px; }
         .btn-back { display: block; text-align: center; margin-top: 15px; color: #aaa; text-decoration: none; font-size: 13px; }
         .btn-back:hover { color: #fff; }
 
@@ -35,7 +35,7 @@
 </head>
 <body>
 
-    <!-- LOGIN BOX (MUNCUL JIKA BELUM LOGIN) -->
+    <!-- LOGIN BOX -->
     <div class="card" id="loginCard">
         <h2>ADMIN LOGIN</h2>
         <p class="subtitle">Enter password to access admin panel</p>
@@ -47,7 +47,7 @@
         <a href="./" class="btn-back">← Back to Main Hub</a>
     </div>
 
-    <!-- ADMIN PANEL (MUNCUL SETELAH LOGIN) -->
+    <!-- ADMIN PANEL -->
     <div class="card" id="adminContainer" style="display: none; max-width: 500px; text-align: left;">
         <h2>ENTROPY ADMIN</h2>
         <p class="subtitle" style="text-align: center;">Publish scripts & control custom IDs</p>
@@ -94,7 +94,9 @@
             <button type="submit" id="submitBtn" class="btn-submit">Publish Post 🚀</button>
         </form>
 
-        <button class="btn-settings" onclick="openPasswordModal()">⚙️ Change Admin Password</button>
+        <button class="btn-settings" onclick="openPasswordModal()">⚙️ Change Password</button>
+        <button class="btn-settings" onclick="openDeviceLimitModal()">🛡️ Set Max Admin Devices</button>
+        <button class="btn-settings" onclick="logoutAdmin()" style="background: #552222; border-color: #ff5555;">🚪 Logout This Device</button>
         <a href="./" class="btn-back" style="text-align: center;">← Back to Main Hub</a>
     </div>
 
@@ -111,6 +113,20 @@
         </div>
     </div>
 
+    <!-- DEVICE LIMIT MODAL -->
+    <div id="deviceLimitModal" class="modal">
+        <div class="modal-content">
+            <h3 style="color: #ffbb00; margin-top: 0;">Max Admin Devices</h3>
+            <p style="color: #aaa; font-size: 13px;">Limit how many devices can be logged in as admin simultaneously.</p>
+            <div class="form-group">
+                <label>Max Devices Allowed:</label>
+                <input type="number" id="maxDevicesInput" min="1" max="10" value="1">
+            </div>
+            <button class="btn-submit" onclick="saveDeviceLimit()">Save Limit</button>
+            <button class="btn-settings" onclick="closeDeviceLimitModal()" style="margin-top: 10px;">Cancel</button>
+        </div>
+    </div>
+
     <!-- CUSTOM ALERT MODAL -->
     <div id="customAlertModal" class="modal">
         <div class="modal-content">
@@ -124,9 +140,41 @@
             return localStorage.getItem("entropy_admin_pw") || "nafyari_rahasia";
         }
 
+        function getMaxDevices() {
+            return parseInt(localStorage.getItem("entropy_max_devices") || "1");
+        }
+
+        function getRegisteredDevices() {
+            try {
+                let list = JSON.parse(localStorage.getItem("entropy_admin_devices") || "[]");
+                return Array.isArray(list) ? list : [];
+            } catch(e) {
+                return [];
+            }
+        }
+
+        function getMyDeviceId() {
+            let id = localStorage.getItem("entropy_my_device_id");
+            if (!id) {
+                id = 'dev_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
+                localStorage.setItem("entropy_my_device_id", id);
+            }
+            return id;
+        }
+
         window.onload = function() {
-            let isVerified = localStorage.getItem("entropy_admin_logged");
-            if (isVerified === "true") {
+            let myId = getMyDeviceId();
+            let registeredDevices = getRegisteredDevices();
+            let isLoggedHere = localStorage.getItem("entropy_admin_logged") === "true";
+
+            let isRegistered = registeredDevices.includes(myId);
+
+            if (!isRegistered && isLoggedHere) {
+                localStorage.removeItem("entropy_admin_logged");
+                isLoggedHere = false;
+            }
+
+            if (isLoggedHere && isRegistered) {
                 document.getElementById('loginCard').style.display = 'none';
                 document.getElementById('adminContainer').style.display = 'block';
                 handleCategoryChange();
@@ -139,34 +187,73 @@
         function verifyLogin() {
             let pass = document.getElementById('loginPasswordInput').value.trim();
             let correctPw = getAdminPassword();
+            let maxDevs = getMaxDevices();
+            let registeredDevices = getRegisteredDevices();
+            let myId = getMyDeviceId();
 
-            if (pass === correctPw) {
-                localStorage.setItem("entropy_admin_logged", "true");
-                document.getElementById('loginCard').style.display = 'none';
-                document.getElementById('adminContainer').style.display = 'block';
-                handleCategoryChange();
-            } else {
+            if (pass !== correctPw) {
                 alert("Incorrect Password!");
+                return;
             }
+
+            if (!registeredDevices.includes(myId)) {
+                if (registeredDevices.length >= maxDevs) {
+                    alert("Access Denied! Maximum admin devices limit reached (" + maxDevs + "). New devices are automatically kicked/blocked.");
+                    window.location.href = "./";
+                    return;
+                }
+                registeredDevices.push(myId);
+                localStorage.setItem("entropy_admin_devices", JSON.stringify(registeredDevices));
+            }
+
+            localStorage.setItem("entropy_admin_logged", "true");
+            document.getElementById('loginCard').style.display = 'none';
+            document.getElementById('adminContainer').style.display = 'block';
+            handleCategoryChange();
+        }
+
+        function logoutAdmin() {
+            let myId = getMyDeviceId();
+            let registeredDevices = getRegisteredDevices();
+            let index = registeredDevices.indexOf(myId);
+            if (index > -1) {
+                registeredDevices.splice(index, 1);
+                localStorage.setItem("entropy_admin_devices", JSON.stringify(registeredDevices));
+            }
+            localStorage.removeItem("entropy_admin_logged");
+            window.location.href = "./";
         }
 
         function openPasswordModal() {
             document.getElementById('passwordModal').style.display = 'flex';
         }
-
         function closePasswordModal() {
             document.getElementById('passwordModal').style.display = 'none';
         }
-
         function saveNewPassword() {
             let newPw = document.getElementById('newAdminPasswordInput').value.trim();
-            if (!newPw) {
-                showAlert("Password cannot be empty!");
-                return;
-            }
+            if (!newPw) { showAlert("Password cannot be empty!"); return; }
             localStorage.setItem("entropy_admin_pw", newPw);
             closePasswordModal();
             showAlert("Admin password successfully updated!");
+        }
+
+        function openDeviceLimitModal() {
+            document.getElementById('maxDevicesInput').value = getMaxDevices();
+            document.getElementById('deviceLimitModal').style.display = 'flex';
+        }
+        function closeDeviceLimitModal() {
+            document.getElementById('deviceLimitModal').style.display = 'none';
+        }
+        function saveDeviceLimit() {
+            let limit = parseInt(document.getElementById('maxDevicesInput').value);
+            if (isNaN(limit) || limit < 1 || limit > 10) {
+                showAlert("Please enter a valid number between 1 and 10.");
+                return;
+            }
+            localStorage.setItem("entropy_max_devices", limit.toString());
+            closeDeviceLimitModal();
+            showAlert("Max admin devices updated to " + limit + "!");
         }
 
         const PUBLIC_BIN_ID = "6aef05abac6210605a74f72a";
