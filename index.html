@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Entropy-Script Hub</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f0f0f; color: #fff; margin: 0; padding: 20px; }
         header { text-align: center; margin-bottom: 30px; }
@@ -42,16 +42,32 @@
         .btn-action-copy { background: #ffbb00; color: #000; font-size: 12px; font-weight: bold; padding: 6px 12px; border-radius: 6px; text-decoration: none; display: inline-block; border: none; cursor: pointer; }
         .btn-action-copy:hover { background: #e0a800; }
 
-        /* MODAL UMUM */
+        /* MODAL UMUM & VIEWER SCRIPT */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
         .modal-content { background: #161616; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; border: 1px solid #333; color: #fff; text-align: center; max-height: 90vh; overflow-y: auto; box-sizing: border-box; }
         
+        /* MODAL SCRIPT VIEWER ALA SCRIPTBLOX (BERSIH, TANPA IKLAN) */
+        .script-viewer-modal { display: none; position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); align-items: center; justify-content: center; padding: 20px; }
+        .script-viewer-box { position: relative; width: 100%; max-width: 820px; max-height: 90vh; display: flex; flex-direction: column; gap: 16px; padding: 22px; border-radius: 22px; background: linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.015)); border: 1px solid rgba(255,255,255,.08); box-shadow: 0 24px 70px rgba(0,0,0,.55); color: #fff; box-sizing: border-box; }
+        .sv-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .sv-title { font-size: 18px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sv-close { background: #222; border: 1px solid #444; color: #fff; font-size: 20px; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .sv-close:hover { background: #333; border-color: #ffbb00; }
+        
+        .sv-pre-wrap { position: relative; display: flex; flex: 1; min-height: 0; }
+        .sv-pre-wrap pre { width: 100%; flex: 1; min-height: 280px; max-height: 50vh; margin: 0; padding: 16px; border: 1px solid rgba(255,255,255,.06); border-radius: 14px; background: rgba(0,0,0,0.5); color: #ddd; font: 13px/1.6 ui-monospace, Menlo, monospace; overflow: auto; white-space: pre-wrap; word-break: break-all; outline: 0; text-align: left; }
+        
+        .sv-footer { display: flex; gap: 10px; justify-content: flex-end; align-items: center; }
+        .btn-sv-action { background: #222; color: #ffbb00; border: 1px solid #ffbb00; padding: 10px 18px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-sv-action:hover { background: #333; }
+
         .close-btn { float: right; font-size: 24px; cursor: pointer; color: #888; }
         .close-btn:hover { color: #fff; }
         .form-group { margin-bottom: 15px; text-align: left; }
         .form-group label { display: block; margin-bottom: 6px; font-size: 14px; color: #ccc; }
-        .form-group input, .form-group select { width: 100%; padding: 12px; background: #0f0f0f; color: #fff; border: 1px solid #333; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; background: #0f0f0f; color: #fff; border: 1px solid #333; border-radius: 6px; box-sizing: border-box; font-size: 14px; outline: none; }
         .form-group select option { background: #0f0f0f; color: #fff; }
+        .form-group textarea { resize: vertical; min-height: 120px; font-family: monospace; }
         
         /* TAG INPUT & ADD BUTTON CONTAINER */
         .tag-input-wrapper { display: flex; gap: 8px; align-items: center; }
@@ -59,26 +75,15 @@
         .btn-add-tag { background: #222; color: #ffbb00; border: 1px solid #ffbb00; padding: 10px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; display: none; white-space: nowrap; }
         .btn-add-tag:hover { background: #333; }
 
-        /* CONTAINER TAGS YANG DITAMBAHKAN DI BAWAH TEXTBOX */
         .added-tags-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
         .selected-tag-chip { background: rgba(255, 187, 0, 0.2); color: #ffbb00; border: 1px solid #ffbb00; padding: 4px 10px; border-radius: 20px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; font-weight: bold; }
         .selected-tag-chip span { cursor: pointer; color: #ff5555; font-weight: bold; font-size: 14px; }
         .selected-tag-chip span:hover { color: #ff2222; }
 
-        /* CUSTOM FILE INPUT STYLING */
-        .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; }
-        .file-input-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
-        .btn-file-custom { border: 1px solid #333; color: #ccc; background: #0f0f0f; padding: 12px; border-radius: 6px; display: block; text-align: center; cursor: pointer; font-size: 14px; }
-        .btn-file-custom:hover { border-color: #ffbb00; color: #ffbb00; }
-
-        .img-container { max-width: 100%; max-height: 250px; margin-bottom: 15px; display: none; }
-        .img-container img { max-width: 100%; display: block; }
-        .btn-crop { background-color: #222; color: #ffbb00; border: 1px solid #ffbb00; padding: 10px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 15px; display: none; width: 100%; }
-        #croppedPreview { width: 100%; height: 140px; object-fit: cover; border-radius: 6px; margin-bottom: 15px; display: none; border: 1px dashed #ffbb00; }
         .cooldown-info { font-size: 12px; color: #f59e0b; margin-top: 5px; }
         
         /* CUSTOM ALERT MODAL */
-        #customAlertModal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; }
+        #customAlertModal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; }
         .custom-alert-box { background: #161616; border: 1px solid #333; padding: 25px; border-radius: 12px; width: 85%; max-width: 350px; text-align: center; box-shadow: 0 8px 24px rgba(0,0,0,0.6); }
         .custom-alert-msg { color: #fff; font-size: 15px; margin-bottom: 20px; line-height: 1.4; }
         .custom-alert-btn { background: #ffbb00; color: #000; border: none; padding: 10px 25px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 14px; width: 100%; }
@@ -102,20 +107,14 @@
             align-items: center;
             gap: 6px;
         }
-        .floating-counter span {
-            color: #ffbb00;
-            font-weight: bold;
-        }
+        .floating-counter span { color: #ffbb00; font-weight: bold; }
 
         /* TOMBOL DISCORD MODAL */
         .btn-discord { background: #5865F2; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block; margin-right: 10px; border: none; cursor: pointer; }
         .btn-later { background: #333; color: white; padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; }
 
-        /* RESPONSIVE MEDIA QUERIES FOR MOBILE */
         @media (max-width: 768px) {
-            #publicScriptList {
-                grid-template-columns: 1fr;
-            }
+            #publicScriptList { grid-template-columns: 1fr; }
             body { padding: 10px; }
         }
     </style>
@@ -126,12 +125,10 @@
         <h1>ENTROPY SCRIPT HUB</h1>
         <p>Explore studio lite scripts or upload your own script.</p>
         
-        <!-- TOMBOL UPLOAD DI HEADER -->
         <div class="header-btns">
             <button class="btn-upload-trigger" onclick="openUploadModal()">+ Upload Script</button>
         </div>
 
-        <!-- SEARCH BAR -->
         <div class="search-container">
             <input type="text" id="searchInput" placeholder="Search scripts, tags or creators..." oninput="filterScripts()">
         </div>
@@ -149,6 +146,22 @@
         <div class="custom-alert-box">
             <div id="customAlertMessage" class="custom-alert-msg">Notification message here</div>
             <button class="custom-alert-btn" onclick="closeCustomAlert()">OK</button>
+        </div>
+    </div>
+
+    <!-- SCRIPT VIEWER MODAL (ALA SCRIPTBLOX BERSIH TANPA IKLAN) -->
+    <div id="scriptViewerModal" class="script-viewer-modal">
+        <div class="script-viewer-box">
+            <div class="sv-header">
+                <div class="sv-title" id="svTitle">Script Title</div>
+                <button class="sv-close" onclick="closeScriptViewer()">&times;</button>
+            </div>
+            <div class="sv-pre-wrap">
+                <pre id="svPreContent"></pre>
+            </div>
+            <div class="sv-footer">
+                <button class="btn-sv-action" onclick="copyViewerScript()">📋 Copy Script</button>
+            </div>
         </div>
     </div>
 
@@ -207,22 +220,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Thumbnail Image (Optional):</label>
-                    <div class="file-input-wrapper">
-                        <div class="btn-file-custom" id="fileLabelText">Choose Image File (Opsional)</div>
-                        <input type="file" id="imageInput" accept="image/*" onchange="updateFileName(this)">
-                    </div>
-                </div>
-
-                <div class="img-container" id="cropperArea">
-                    <img id="sourceImage" alt="Source">
-                </div>
-                <button type="button" class="btn-crop" id="cropBtn" onclick="performCrop()">Crop & Resize Image ✂️</button>
-                <img id="croppedPreview" alt="Cropped Preview">
-
-                <div class="form-group">
-                    <label id="linkFieldLabel">Script Link:</label>
-                    <input type="text" id="scriptLink" placeholder="https://pastebin.com/raw/..." required>
+                    <label id="linkFieldLabel">Script / Code Content:</label>
+                    <textarea id="scriptContentInput" placeholder="Paste your Lua script here directly..." required></textarea>
                 </div>
 
                 <button type="submit" id="submitBtn" style="width: 100%; background: #28a745; color: white; padding: 12px; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px;">Upload Now 🚀</button>
@@ -230,7 +229,7 @@
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script>
         const PUBLIC_BIN_ID = "6aef05abac6210605a74f72a";
         const VISITOR_BIN_ID = "6aef6a34ac6210605a75da3f"; 
@@ -238,11 +237,10 @@
         
         const DEFAULT_AUTO_IMAGE = "https://tr.rbxcdn.com/180DAY-2944a7f2090621fd07d89499ea40fa46/500/280/Image/Jpeg/noFilter";
 
-        let cropper;
-        let finalImageUrl = "";
         let allScriptsData = [];
         let alertCallback = null;
         let selectedTags = [];
+        let activeScriptRawText = "";
 
         function showCustomAlert(message, callback = null) {
             document.getElementById('customAlertMessage').innerText = message;
@@ -282,7 +280,7 @@
                 return;
             }
 
-            scripts.forEach(item => {
+            scripts.forEach((item, index) => {
                 let tagsHtml = "";
                 if (item.tags) {
                     let tagList = Array.isArray(item.tags) ? item.tags : item.tags.split(',');
@@ -302,7 +300,7 @@
                     let safeId = (item.link || "").replace(/'/g, "\\'");
                     actionBtnHtml = `<button class="btn-action-copy" onclick="copyIdToClipboard('${safeId}')">📋 ${btnText}</button>`;
                 } else {
-                    actionBtnHtml = `<a href="${item.link}" target="_blank" class="btn-action-link">Get Script →</a>`;
+                    actionBtnHtml = `<button class="btn-action-link" onclick="openScriptViewer(${index})">See Script →</button>`;
                 }
 
                 let imgSource = item.image || DEFAULT_AUTO_IMAGE;
@@ -320,6 +318,40 @@
                         </div>
                     </div>
                 `;
+            });
+        }
+
+        function openScriptViewer(index) {
+            let item = allScriptsData[index];
+            if (!item) return;
+
+            document.getElementById('svTitle').innerText = item.title || "Script Viewer";
+            activeScriptRawText = item.link || "";
+
+            let preEl = document.getElementById('svPreContent');
+            try {
+                if (window.hljs) {
+                    preEl.innerHTML = hljs.highlight(activeScriptRawText, { language: 'lua' }).value;
+                } else {
+                    preEl.textContent = activeScriptRawText;
+                }
+            } catch(e) {
+                preEl.textContent = activeScriptRawText;
+            }
+
+            document.getElementById('scriptViewerModal').style.display = 'flex';
+        }
+
+        function closeScriptViewer() {
+            document.getElementById('scriptViewerModal').style.display = 'none';
+        }
+
+        function copyViewerScript() {
+            if (!activeScriptRawText) return;
+            navigator.clipboard.writeText(activeScriptRawText).then(() => {
+                showCustomAlert('Script successfully copied to clipboard!');
+            }).catch(() => {
+                showCustomAlert('Failed to copy script.');
             });
         }
 
@@ -426,14 +458,14 @@
         function handleCategoryChange() {
             let cat = document.getElementById('categoryType').value;
             let linkLabel = document.getElementById('linkFieldLabel');
-            let linkInput = document.getElementById('scriptLink');
+            let linkInput = document.getElementById('scriptContentInput');
 
             selectedTags = [];
 
             if (cat === 'script') {
                 selectedTags.push('script');
-                linkLabel.innerText = "Script Link:";
-                linkInput.placeholder = "https://pastebin.com/raw/...";
+                linkLabel.innerText = "Script / Code Content:";
+                linkInput.placeholder = "Paste your Lua script here directly...";
             } else if (cat === 'toolbox_id') {
                 selectedTags.push('toolbox');
                 linkLabel.innerText = "Toolbox ID:";
@@ -500,59 +532,12 @@
             });
         }
 
-        function updateFileName(input) {
-            let labelText = document.getElementById('fileLabelText');
-            if (input.files && input.files.length > 0) {
-                labelText.innerText = "File selected: " + input.files[0].name;
-            } else {
-                labelText.innerText = "Choose Image File (Opsional)";
-            }
-        }
-
-        const imageInput = document.getElementById('imageInput');
-        const sourceImage = document.getElementById('sourceImage');
-        const cropperArea = document.getElementById('cropperArea');
-        const cropBtn = document.getElementById('cropBtn');
-        const croppedPreview = document.getElementById('croppedPreview');
-
-        imageInput.addEventListener('change', function (e) {
-            let files = e.target.files;
-            if (files && files.length > 0) {
-                let file = files.item(0);
-                let reader = new FileReader();
-                reader.onload = function (event) {
-                    sourceImage.src = event.target.result;
-                    cropperArea.style.display = 'block';
-                    cropBtn.style.display = 'block';
-                    croppedPreview.style.display = 'none';
-
-                    if (cropper) { cropper.destroy(); }
-                    cropper = new Cropper(sourceImage, { aspectRatio: 16 / 9, viewMode: 1 });
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        function performCrop() {
-            if (cropper) {
-                let canvas = cropper.getCroppedCanvas({ width: 400, height: 225 });
-                finalImageUrl = canvas.toDataURL('image/jpeg', 0.6);
-                
-                croppedPreview.src = finalImageUrl;
-                croppedPreview.style.display = 'block';
-                cropperArea.style.display = 'none';
-                cropBtn.style.display = 'none';
-                cropper.destroy();
-                showCustomAlert('Image successfully cropped!');
-            }
-        }
-
         async function submitPublicScript(event) {
             event.preventDefault();
             let hubName = document.getElementById('hubName').value.trim();
             let title = document.getElementById('scriptTitle').value.trim();
             let category = document.getElementById('categoryType').value;
-            let link = document.getElementById('scriptLink').value.trim();
+            let link = document.getElementById('scriptContentInput').value.trim();
             let submitBtn = document.getElementById('submitBtn');
 
             if (selectedTags.length < 3 || selectedTags.length > 6) {
@@ -607,10 +592,14 @@
 
                 let tagsString = selectedTags.join(',');
 
-                // Jika user meng-crop gambar sendiri, pakai gambar itu. Jika tidak, pakai gambar default otomatis.
-                let imageToSave = finalImageUrl ? finalImageUrl : DEFAULT_AUTO_IMAGE;
-
-                scripts.unshift({ hubName, title, category, tags: tagsString, image: imageToSave, link });
+                scripts.unshift({ 
+                    hubName, 
+                    title, 
+                    category, 
+                    tags: tagsString, 
+                    image: DEFAULT_AUTO_IMAGE, 
+                    link 
+                });
 
                 let putRes = await fetch(`https://api.jsonbin.io/v3/b/${PUBLIC_BIN_ID}`, {
                     method: 'PUT',
