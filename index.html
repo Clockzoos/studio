@@ -42,32 +42,29 @@
         .btn-action-copy { background: #ffbb00; color: #000; font-size: 12px; font-weight: bold; padding: 6px 12px; border-radius: 6px; text-decoration: none; display: inline-block; border: none; cursor: pointer; }
         .btn-action-copy:hover { background: #e0a800; }
 
-        /* MODAL UMUM & VIEWER SCRIPT */
+        /* RAW VIEWER HALAMAN PENUH (ALA PASTEBIN RAW) */
+        #rawViewerPage { display: none; max-width: 900px; margin: 0 auto; background: #161616; border: 1px solid #333; border-radius: 12px; padding: 25px; box-sizing: border-box; }
+        .raw-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        .raw-title { font-size: 18px; font-weight: bold; color: #ffbb00; }
+        .raw-actions { display: flex; gap: 10px; }
+        .btn-raw-action { background: #ffbb00; color: #000; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; text-decoration: none; display: inline-block; }
+        .btn-raw-action:hover { background: #e0a800; }
+        .btn-back-home { background: #333; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; text-decoration: none; display: inline-block; }
+        .btn-back-home:hover { background: #444; }
+        
+        #rawPreContent { background: #0b0b0b; border: 1px solid #222; border-radius: 8px; padding: 15px; color: #ddd; font-family: ui-monospace, Menlo, Monaco, monospace; font-size: 13px; line-height: 1.5; overflow-x: auto; white-space: pre; margin: 0; text-align: left; }
+
+        /* MODAL UMUM */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
         .modal-content { background: #161616; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; border: 1px solid #333; color: #fff; text-align: center; max-height: 90vh; overflow-y: auto; box-sizing: border-box; }
         
-        /* MODAL SCRIPT VIEWER ALA SCRIPTBLOX (BERSIH, TANPA IKLAN) */
-        .script-viewer-modal { display: none; position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); align-items: center; justify-content: center; padding: 20px; }
-        .script-viewer-box { position: relative; width: 100%; max-width: 820px; max-height: 90vh; display: flex; flex-direction: column; gap: 16px; padding: 22px; border-radius: 22px; background: linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.015)); border: 1px solid rgba(255,255,255,.08); box-shadow: 0 24px 70px rgba(0,0,0,.55); color: #fff; box-sizing: border-box; }
-        .sv-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-        .sv-title { font-size: 18px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .sv-close { background: #222; border: 1px solid #444; color: #fff; font-size: 20px; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .sv-close:hover { background: #333; border-color: #ffbb00; }
-        
-        .sv-pre-wrap { position: relative; display: flex; flex: 1; min-height: 0; }
-        .sv-pre-wrap pre { width: 100%; flex: 1; min-height: 280px; max-height: 50vh; margin: 0; padding: 16px; border: 1px solid rgba(255,255,255,.06); border-radius: 14px; background: rgba(0,0,0,0.5); color: #ddd; font: 13px/1.6 ui-monospace, Menlo, monospace; overflow: auto; white-space: pre-wrap; word-break: break-all; outline: 0; text-align: left; }
-        
-        .sv-footer { display: flex; gap: 10px; justify-content: flex-end; align-items: center; }
-        .btn-sv-action { background: #222; color: #ffbb00; border: 1px solid #ffbb00; padding: 10px 18px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
-        .btn-sv-action:hover { background: #333; }
-
         .close-btn { float: right; font-size: 24px; cursor: pointer; color: #888; }
         .close-btn:hover { color: #fff; }
         .form-group { margin-bottom: 15px; text-align: left; }
         .form-group label { display: block; margin-bottom: 6px; font-size: 14px; color: #ccc; }
         .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; background: #0f0f0f; color: #fff; border: 1px solid #333; border-radius: 6px; box-sizing: border-box; font-size: 14px; outline: none; }
         .form-group select option { background: #0f0f0f; color: #fff; }
-        .form-group textarea { resize: vertical; min-height: 120px; font-family: monospace; }
+        .form-group textarea { resize: vertical; min-height: 140px; font-family: monospace; }
         
         /* TAG INPUT & ADD BUTTON CONTAINER */
         .tag-input-wrapper { display: flex; gap: 8px; align-items: center; }
@@ -121,24 +118,42 @@
 </head>
 <body>
 
-    <header>
-        <h1>ENTROPY SCRIPT HUB</h1>
-        <p>Explore studio lite scripts or upload your own script.</p>
-        
-        <div class="header-btns">
-            <button class="btn-upload-trigger" onclick="openUploadModal()">+ Upload Script</button>
-        </div>
+    <!-- MAIN APP CONTENT -->
+    <div id="mainAppContainer">
+        <header>
+            <h1>ENTROPY SCRIPT HUB</h1>
+            <p>Explore studio lite scripts or upload your own script.</p>
+            
+            <div class="header-btns">
+                <button class="btn-upload-trigger" onclick="openUploadModal()">+ Upload Script</button>
+            </div>
 
-        <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Search scripts, tags or creators..." oninput="filterScripts()">
-        </div>
-    </header>
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search scripts, tags or creators..." oninput="filterScripts()">
+            </div>
+        </header>
 
-    <div class="container">
-        <h2>All Posts</h2>
-        <div id="publicScriptList">
-            <p style="color: #777;">Loading scripts...</p>
+        <div class="container">
+            <h2>All Posts</h2>
+            <div id="publicScriptList">
+                <p style="color: #777;">Loading scripts...</p>
+            </div>
         </div>
+    </div>
+
+    <!-- RAW SCRIPT VIEWER PAGE (MUNCUL JIKA ADA HASH #ID) -->
+    <div id="rawViewerPage">
+        <div class="raw-header">
+            <div>
+                <div class="raw-title" id="rawViewerTitle">Script Title</div>
+                <p style="color: #888; font-size: 12px; margin: 3px 0 0 0;" id="rawViewerMeta">Creator: Anonymous</p>
+            </div>
+            <div class="raw-actions">
+                <button class="btn-raw-action" onclick="copyRawScript()">📋 Copy Script</button>
+                <a href="./" class="btn-back-home">← Back to Hub</a>
+            </div>
+        </div>
+        <pre id="rawPreContent"></pre>
     </div>
 
     <!-- CUSTOM ALERT MODAL -->
@@ -146,22 +161,6 @@
         <div class="custom-alert-box">
             <div id="customAlertMessage" class="custom-alert-msg">Notification message here</div>
             <button class="custom-alert-btn" onclick="closeCustomAlert()">OK</button>
-        </div>
-    </div>
-
-    <!-- SCRIPT VIEWER MODAL (ALA SCRIPTBLOX BERSIH TANPA IKLAN) -->
-    <div id="scriptViewerModal" class="script-viewer-modal">
-        <div class="script-viewer-box">
-            <div class="sv-header">
-                <div class="sv-title" id="svTitle">Script Title</div>
-                <button class="sv-close" onclick="closeScriptViewer()">&times;</button>
-            </div>
-            <div class="sv-pre-wrap">
-                <pre id="svPreContent"></pre>
-            </div>
-            <div class="sv-footer">
-                <button class="btn-sv-action" onclick="copyViewerScript()">📋 Copy Script</button>
-            </div>
         </div>
     </div>
 
@@ -221,7 +220,7 @@
 
                 <div class="form-group">
                     <label id="linkFieldLabel">Script / Code Content:</label>
-                    <textarea id="scriptContentInput" placeholder="Paste your Lua script here directly..." required></textarea>
+                    <textarea id="scriptContentInput" placeholder="Paste your Lua script here directly..." required style="white-space: pre; word-wrap: normal; overflow-x: scroll;"></textarea>
                 </div>
 
                 <button type="submit" id="submitBtn" style="width: 100%; background: #28a745; color: white; padding: 12px; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px;">Upload Now 🚀</button>
@@ -240,7 +239,7 @@
         let allScriptsData = [];
         let alertCallback = null;
         let selectedTags = [];
-        let activeScriptRawText = "";
+        let currentRawScriptText = "";
 
         function showCustomAlert(message, callback = null) {
             document.getElementById('customAlertMessage').innerText = message;
@@ -256,8 +255,9 @@
             }
         }
 
-        async function loadPublicScripts() {
-            let container = document.getElementById('publicScriptList');
+        async function initApp() {
+            let hash = window.location.hash.replace('#', '');
+            
             try {
                 let res = await fetch(`https://api.jsonbin.io/v3/b/${PUBLIC_BIN_ID}/latest`, {
                     headers: { 'X-Master-Key': MASTER_KEY }
@@ -265,10 +265,42 @@
                 let data = await res.json();
                 allScriptsData = data.record || [];
 
-                renderScripts(allScriptsData);
+                if (hash) {
+                    let found = allScriptsData.find(item => item.id === hash);
+                    if (found) {
+                        document.getElementById('mainAppContainer').style.display = 'none';
+                        document.getElementById('rawViewerPage').style.display = 'block';
+                        
+                        document.getElementById('rawViewerTitle').innerText = found.title || "Untitled Script";
+                        document.getElementById('rawViewerMeta').innerText = "Creator: " + (found.hubName || "Anonymous") + " · Category: " + (found.category || "script");
+                        
+                        currentRawScriptText = found.link || "";
+                        let preEl = document.getElementById('rawPreContent');
+                        
+                        try {
+                            if (window.hljs) {
+                                preEl.innerHTML = hljs.highlight(currentRawScriptText, { language: 'lua' }).value;
+                            } else {
+                                preEl.textContent = currentRawScriptText;
+                            }
+                        } catch(e) {
+                            preEl.textContent = currentRawScriptText;
+                        }
+                    } else {
+                        document.getElementById('mainAppContainer').style.display = 'block';
+                        renderScripts(allScriptsData);
+                    }
+                } else {
+                    document.getElementById('mainAppContainer').style.display = 'block';
+                    renderScripts(allScriptsData);
+                }
             } catch (err) {
-                container.innerHTML = `<p style="color: #ff5555;">Failed to load scripts.</p>`;
+                console.error(err);
+                let container = document.getElementById('publicScriptList');
+                if (container) container.innerHTML = `<p style="color: #ff5555;">Failed to load scripts.</p>`;
             }
+
+            trackAndLoadVisitorCount();
         }
 
         function renderScripts(scripts) {
@@ -280,7 +312,7 @@
                 return;
             }
 
-            scripts.forEach((item, index) => {
+            scripts.forEach(item => {
                 let tagsHtml = "";
                 if (item.tags) {
                     let tagList = Array.isArray(item.tags) ? item.tags : item.tags.split(',');
@@ -300,7 +332,8 @@
                     let safeId = (item.link || "").replace(/'/g, "\\'");
                     actionBtnHtml = `<button class="btn-action-copy" onclick="copyIdToClipboard('${safeId}')">📋 ${btnText}</button>`;
                 } else {
-                    actionBtnHtml = `<button class="btn-action-link" onclick="openScriptViewer(${index})">See Script →</button>`;
+                    let scriptId = item.id || "";
+                    actionBtnHtml = `<a href="./#${scriptId}" class="btn-action-link">See Script →</a>`;
                 }
 
                 let imgSource = item.image || DEFAULT_AUTO_IMAGE;
@@ -321,34 +354,9 @@
             });
         }
 
-        function openScriptViewer(index) {
-            let item = allScriptsData[index];
-            if (!item) return;
-
-            document.getElementById('svTitle').innerText = item.title || "Script Viewer";
-            activeScriptRawText = item.link || "";
-
-            let preEl = document.getElementById('svPreContent');
-            try {
-                if (window.hljs) {
-                    preEl.innerHTML = hljs.highlight(activeScriptRawText, { language: 'lua' }).value;
-                } else {
-                    preEl.textContent = activeScriptRawText;
-                }
-            } catch(e) {
-                preEl.textContent = activeScriptRawText;
-            }
-
-            document.getElementById('scriptViewerModal').style.display = 'flex';
-        }
-
-        function closeScriptViewer() {
-            document.getElementById('scriptViewerModal').style.display = 'none';
-        }
-
-        function copyViewerScript() {
-            if (!activeScriptRawText) return;
-            navigator.clipboard.writeText(activeScriptRawText).then(() => {
+        function copyRawScript() {
+            if (!currentRawScriptText) return;
+            navigator.clipboard.writeText(currentRawScriptText).then(() => {
                 showCustomAlert('Script successfully copied to clipboard!');
             }).catch(() => {
                 showCustomAlert('Failed to copy script.');
@@ -537,7 +545,7 @@
             let hubName = document.getElementById('hubName').value.trim();
             let title = document.getElementById('scriptTitle').value.trim();
             let category = document.getElementById('categoryType').value;
-            let link = document.getElementById('scriptContentInput').value.trim();
+            let link = document.getElementById('scriptContentInput').value; // Tanpa .trim() agar baris & spasi script asli terjaga
             let submitBtn = document.getElementById('submitBtn');
 
             if (selectedTags.length < 3 || selectedTags.length > 6) {
@@ -591,8 +599,10 @@
                 if (!Array.isArray(scripts)) scripts = [];
 
                 let tagsString = selectedTags.join(',');
+                let uniqueId = Math.floor(10000 + Math.random() * 90000).toString(); // ID unik 5 digit
 
                 scripts.unshift({ 
+                    id: uniqueId,
                     hubName, 
                     title, 
                     category, 
@@ -626,8 +636,7 @@
         }
 
         window.onload = function() {
-            loadPublicScripts();
-            trackAndLoadVisitorCount();
+            initApp();
         };
     </script>
 </body>
