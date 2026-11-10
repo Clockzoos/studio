@@ -259,11 +259,13 @@
             let hash = window.location.hash.replace('#', '');
             
             try {
-                let res = await fetch(`https://api.jsonbin.io/v3/b/${PUBLIC_BIN_ID}/latest`, {
-                    headers: { 'X-Master-Key': MASTER_KEY }
-                });
-                let data = await res.json();
-                allScriptsData = data.record || [];
+                if (allScriptsData.length === 0) {
+                    let res = await fetch(`https://api.jsonbin.io/v3/b/${PUBLIC_BIN_ID}/latest`, {
+                        headers: { 'X-Master-Key': MASTER_KEY }
+                    });
+                    let data = await res.json();
+                    allScriptsData = data.record || [];
+                }
 
                 if (hash) {
                     let found = allScriptsData.find(item => item.id === hash);
@@ -545,7 +547,7 @@
             let hubName = document.getElementById('hubName').value.trim();
             let title = document.getElementById('scriptTitle').value.trim();
             let category = document.getElementById('categoryType').value;
-            let link = document.getElementById('scriptContentInput').value; // Tanpa .trim() agar baris & spasi script asli terjaga
+            let link = document.getElementById('scriptContentInput').value;
             let submitBtn = document.getElementById('submitBtn');
 
             if (selectedTags.length < 3 || selectedTags.length > 6) {
@@ -599,7 +601,7 @@
                 if (!Array.isArray(scripts)) scripts = [];
 
                 let tagsString = selectedTags.join(',');
-                let uniqueId = Math.floor(10000 + Math.random() * 90000).toString(); // ID unik 5 digit
+                let uniqueId = Math.floor(10000 + Math.random() * 90000).toString();
 
                 scripts.unshift({ 
                     id: uniqueId,
@@ -638,6 +640,11 @@
         window.onload = function() {
             initApp();
         };
+
+        // Deteksi perubahan hash otomatis (ketika tombol See Script diklik)
+        window.addEventListener('hashchange', function() {
+            initApp();
+        });
     </script>
 </body>
 </html>
