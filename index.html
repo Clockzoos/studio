@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Entropy-Script Hub</title>
+    <title>Clockzoos - Website Studio</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f0f0f; color: #fff; margin: 0; padding: 20px; }
@@ -121,7 +121,7 @@
     <!-- MAIN APP CONTENT -->
     <div id="mainAppContainer">
         <header>
-            <h1>ENTROPY SCRIPT HUB</h1>
+            <h1>CLOCKZOOS SCRIPT HUB</h1>
             <p>Explore studio lite scripts or upload your own script.</p>
             
             <div class="header-btns">
@@ -191,7 +191,7 @@
             <form id="publicUploadForm" onsubmit="submitPublicScript(event)">
                 <div class="form-group">
                     <label>Creator Name:</label>
-                    <input type="text" id="hubName" placeholder="e.g. nafyari" required>
+                    <input type="text" id="hubName" placeholder="e.g. Clockzoos" required>
                     <div id="cooldownText" class="cooldown-info"></div>
                 </div>
 
@@ -391,7 +391,7 @@
 
         async function trackAndLoadVisitorCount() {
             try {
-                let hasCounted = sessionStorage.getItem('entropy_visit_recorded');
+                let hasCounted = sessionStorage.getItem('clockzoos_visit_recorded');
 
                 let res = await fetch(`https://api.jsonbin.io/v3/b/${VISITOR_BIN_ID}/latest`, {
                     headers: { 'X-Master-Key': MASTER_KEY }
@@ -410,7 +410,7 @@
                         body: JSON.stringify(visitorData)
                     });
 
-                    sessionStorage.setItem('entropy_visit_recorded', 'true');
+                    sessionStorage.setItem('clockzoos_visit_recorded', 'true');
                 }
 
                 document.getElementById('visitorCount').innerText = visitorsList.length.toLocaleString();
@@ -641,7 +641,6 @@
             initApp();
         };
 
-        // Deteksi perubahan hash otomatis (ketika tombol See Script diklik)
         window.addEventListener('hashchange', function() {
             initApp();
         });
